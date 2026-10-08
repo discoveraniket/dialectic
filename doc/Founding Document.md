@@ -1,12 +1,12 @@
-# Project Charter & Founding Document: The Cognitive IDE for Research
+# Project Charter & Founding Document: The Workspace for Research
 
 ---
 
 ## 1. Executive Summary & Vision
 
-Modern research lacks a dedicated integrated development environment. While software engineers have IDEs (like VS Code) that parse code semantics, trace dependencies, flag syntax errors, and run tests, researchers navigate complex cognitive workflows using disjointed tools: generic word processors, disconnected PDF readers, static citation managers, and chaotic chat interfaces.
+Modern research lacks a dedicated integrated environment. While software engineers have environments that parse code semantics, trace dependencies, flag syntax errors, and run tests, researchers navigate complex inquiry workflows using disjointed tools: generic word processors, disconnected PDF readers, static citation managers, and chaotic chat interfaces.
 
-This product is an **Agent-Driven Cognitive Workspace for Independent and Early-Stage Researchers**. It covers the complete intellectual lifecycle—from initial ambiguous ideation to manuscript publication. It treats research not as raw text or administrative tasks, but as a living, interconnected **epistemic graph** composed of assumptions, literature, claims, evidence, and conclusions.
+This product is an **Agent-Driven Workspace for Independent and Early-Stage Researchers**. It covers the complete intellectual lifecycle—from initial ambiguous ideation to manuscript publication. It treats research not as raw text or administrative tasks, but as a living, interconnected **epistemic graph** composed of assumptions, literature, claims, evidence, and conclusions.
 
 ---
 
@@ -21,9 +21,9 @@ This product is an **Agent-Driven Cognitive Workspace for Independent and Early-
 
 * **Human as Sovereign Supervisor:** High-stakes intellectual rigor demands that the AI never silently overwrite, delete, or hallucinate content into existence. The AI cannot unilaterally mutate the workspace state.
 * **The "Pull Request" Paradigm:** Every structural synthesis, parameter change, hypothesis pivot, or draft edit is staged as an explicit **diff** accompanied by a clear rationale. The researcher retains full veto, edit, and approval authority.
-* **Dialectical Partner over Ghostwriter:** The agent acts primarily as a critical collaborator and Socratic inquisitor rather than an auto-complete bot. It prevents cognitive atrophy by challenging weak reasoning, testing falsifiability, and probing for unstated assumptions.
+* **Dialectical Partner over Ghostwriter:** The agent acts primarily as a critical collaborator and Socratic inquisitor rather than an auto-complete bot. It prevents intellectual atrophy by challenging weak reasoning, testing falsifiability, and probing for unstated assumptions.
 
-### III. Pure Cognitive Leverage (Anti-Secretarial)
+### III. Pure Intellectual Leverage (Anti-Secretarial)
 
 * **No Project Management Bloat:** The platform strictly rejects calendars, countdown timers, deadline reminders, and generic to-do boards.
 
@@ -64,7 +64,7 @@ The immediate MVP milestone focuses on **Phase 1: Ideation & Constraint Scoping*
 ### Concrete Example Workflow (The "Bioinformatics" Scenario)
 
 * **User Input:** *"I want to do research in bioinformatics. No lab access. Good computer, fast internet, time, and money. Suggest ideas."*
-* **Cognitive Operations Performed by System:**
+* **Analytical Operations Performed by System:**
 1. **Constraint Extraction:** Detects hard blockers (zero wet-lab dependencies; must rely on public datasets like NCBI/GEO/UniProt) and available leverage (high local/cloud compute, budget for APIs or open access).
 2. **Taxonomic Framing:** Rather than listing 10 unguided topics, the agent surfaces distinct **Inquiry Archetypes** (e.g., *Cross-Dataset Meta-Analysis*, *In-Silico Structural Modeling*, or *Tool Benchmarking & Pipeline Engineering*).
 3. **Diff Proposal:** Stages a formal **Core Problem Dossier** in the Right Pane, awaiting explicit human approval.
@@ -139,5 +139,5 @@ The immediate MVP milestone focuses on **Phase 1: Ideation & Constraint Scoping*
 ## 6. Product Success Metrics
 
 1. **Epistemic Clarity:** Time required for an early-stage researcher to formulate a falsifiable, constraint-aligned research problem.
-2. **Cognitive Agency:** Percentage of agent-proposed diffs that are actively reviewed, annotated, or modified by the user (guarding against passive rubber-stamping).
+2. **Epistemic Agency:** Percentage of agent-proposed diffs that are actively reviewed, annotated, or modified by the user (guarding against passive rubber-stamping).
 3. **Execution Feasibility:** Zero abandoned projects resulting from unaddressed upfront constraints (such as discovering three months in that an idea requires wet-lab access or unobtainable data).

@@ -10,7 +10,7 @@
 * **What it is:** An agent-driven workspace for early-stage and independent researchers.
 * **Core Mental Model:** **"AI Proposes, Human Disposes" (Asymmetric Agency)**.
   The software is a dialectical thinking partner. The AI never mutates project state silently; every structural synthesis, constraint addition, or hypothesis pivot is staged as a reviewable proposal (the Pull-Request paradigm). The human researcher remains the sovereign supervisor.
-* **Anti-Secretarial (Pure Cognitive Leverage):**
+* **Anti-Secretarial (Pure Intellectual Leverage):**
   We strictly reject productivity bloat—no calendars, no countdown timers, no deadline alerts, and no generic Kanban boards. The UI is built entirely around epistemic inquiry: claims, evidence, hypotheses, constraints, and assumptions.
 
 ---
@@ -60,7 +60,7 @@ Dialectic adopts the modular, collapsible **VS Code workbench layout**. This arc
 ## 3. Guiding Design Principles
 
 ### Principle I: Simplicity Above All
-* **No vanity labels:** Do not badge the app with words like `"IDE"` or `"Cognitive IDE"`. Let the tool's precision speak for itself.
+* **No vanity labels:** Do not badge the app with buzzwords or vanity labels. Let the tool's precision speak for itself.
 * **Earn your pixels:** Do not add mock tabs, dummy graphs, or fake logs. An empty state with a clear call-to-action is always better than artificial clutter.
 
 ### Principle II: Spatial Fluidity & User Sovereignty
