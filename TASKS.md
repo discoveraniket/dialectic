@@ -24,7 +24,7 @@
 - [x] Task 3.5: Update `SecondarySideBar.tsx` (Chat) to `#181818` palette with borderless header and `StatusBar.tsx` to `#1f1f1f` palette.
 - [x] Task 3.6: Verify implementation with `npm run build` and visual inspection against reference screenshot.
 
-## Phase 4: Minor Layout & Divider Refinements (In Progress)
+## Phase 4: Minor Layout & Divider Refinements (Completed)
 - [x] Task 4.1: Update `TitleBar.tsx` to remove the bottom divider line (`border-b border-[#2b2b2b]`).
 - [x] Task 4.2: Update `TitleBar.tsx` layout toggle controls to be free-standing individual buttons without an enclosing box.
 - [x] Task 4.3: Update `EditorArea.tsx` tab strip so active tabs have smooth curved top corners (`rounded-t-md`).
