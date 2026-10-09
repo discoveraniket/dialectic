@@ -12,7 +12,7 @@
 - [x] Task 2.1: Update `StatusBar.tsx` to the Dark Modern theme (`bg-[#181818]`, `border-t border-[#2b2b2b]`, muted icons `#cccccc`, subtle remote indicator button).
 - [x] Task 2.2: Refactor `WelcomePage.tsx` to remove the oversized hero header, collapse walkthrough cards by default, and streamline vertical padding and typography to match `vscode.dev` screenshot.
 - [x] Task 2.3: Refactor `PrimarySideBar.tsx` Explorer to title-case `Explorer`, add `∨ No Folder Opened` collapsible accordion, and add styled `Open Folder`, `Open Recent`, `Connect to Tunnel...`, and `Open Remote Repository` actions.
-- [x] Task 2.4: Refactor `SecondarySideBar.tsx` into the authentic `Chat` auxiliary panel with `+` `∨` `|` `✕` header, *"Build with Agent"* empty state, and modern prompt box.
+- [x] Task 2.4: Refactor `SecondarySideBar.tsx` into the authentic `Chat` auxiliary panel with `+` `∨` `|` `✕` header, *"Research with Agent"* empty state, and modern prompt box.
 - [x] Task 2.5: Standardize all borders and dividing lines across the workbench to `#2b2b2b` and verify dark background uniformity.
 - [x] Task 2.6: Verification — Run `npm run build` and verify that the app visually matches the `vscode.dev` screenshot.
 
@@ -41,3 +41,16 @@
 - [x] Task 5.4: Add an internal horizontal divider line (`border-b border-[#333333]`) between the tip banner and typing area inside the prompt card.
 - [x] Task 5.5: Update the 4 bottom action buttons (`+` Add context, `Auto` Models, `⇄` Config, `↑` Send) to be free-standing and unboxed without separate background containers.
 - [x] Task 5.6: Verification — Run `npm run build` and capture a screenshot with Edge to visually confirm all 5 chat panel refinements.
+
+## Phase 6: Project Restructuring & Modular Decomposition (Architecture Preparation)
+- [x] Task 6.1: Create directory structure (`src/components/chat/`, `src/services/`, `src/hooks/`) and establish domain types in `src/types/chat.ts`.
+- [x] Task 6.2: Extract modular UI sub-components from `SecondarySideBar.tsx` into `src/components/chat/` (`ChatHeader.tsx`, `ChatEmptyState.tsx`, `ChatMessageItem.tsx`, `ChatMessageList.tsx`, `ChatPromptInput.tsx`, `ChatContainer.tsx`), strictly enforcing `<250 lines` rule.
+- [x] Task 6.3: Refactor `SecondarySideBar.tsx` into a thin layout container hosting `ChatContainer`.
+- [x] Task 6.4: Restructuring Verification — Run `npm run build` to confirm zero regression in layout, styling, and functionality before any feature logic is introduced.
+
+## Phase 7: Functional Chat & Gemini Live Integration
+- [ ] Task 7.1: Configure `vite.config.ts` to bridge `process.env.GEMINI_API_KEY` into client environment, and create `.env.example` without exposing secrets.
+- [ ] Task 7.2: Implement `src/services/geminiService.ts` for live Google Gemini API calls, incorporating Socratic Inquisitor system instructions, model fallback, and robust error handling.
+- [ ] Task 7.3: Implement `src/hooks/useChat.ts` managing message state, loading lifecycle, abort controller, and `localStorage` persistence across browser reloads.
+- [ ] Task 7.4: Wire `useChat` into `ChatContainer`, enabling live message sending, interactive chat stream/response, and session reset.
+- [ ] Task 7.5: Verification — Run `npm run build` and verify end-to-end live conversational research dialogue with the Socratic agent.

@@ -31,12 +31,12 @@ Researchers, developers, and knowledge workers seeking the modern IDE layout fou
     - Left: "Chat" tab button enclosed inside a separate rounded box container (`bg-[#2b2b2b] text-white px-2.5 py-1 rounded-md text-xs font-medium`).
     - Right: Controls `+` (New Chat), `∨` (Dropdown), `...` (More Actions), vertical divider (`|`), **Maximize button (`[ ]` corner brackets icon to toggle panel expansion)**, and `✕` (Close).
   - Body & Prompt Box:
-    - Empty state: speech bubble with sparkles icon, "Build with Agent", and action link.
+    - Empty state: speech bubble with sparkles icon, "Research with Agent", and action link.
     - Floating prompt card at the bottom: **No dividing line** between the prompt card container and the chat body (`border-t` removed).
     - Prompt card (`rounded-lg bg-[#252525] border border-[#383838] overflow-hidden`):
       - Tip banner at top with `/create-agent` shortcut.
       - **Internal horizontal divider line (`border-b border-[#333333]`) separating the tip banner from the typing area**.
-      - Text input area with "Describe what to build" placeholder.
+      - Text input area with "Write your thoughts" placeholder.
       - Bottom action controls: **4 free-standing, unboxed buttons** (no separate button backgrounds/boxes):
         1. `+` (Add Context)
         2. `Auto` (Model selector)
@@ -50,12 +50,31 @@ Researchers, developers, and knowledge workers seeking the modern IDE layout fou
 - Inter-tile divider gaps are thin (`w-[4px]` or `w-1`), containing a subtle vertical three-dot resize handle indicator in the vertical center. Highlights with `#0078d4` line during active drag/hover.
 - Horizontal sash sits between the editor canvas and the docked bottom panel inside the Center Tile.
 
-## 5. Explicit Out-of-Scope List
-- Backend file access, real git cloning, or remote server connections.
-- Real LLM backend integration (chat is client-side visual simulation).
+## 5. Functional Chat & Socratic Inquisitor Architecture
+- **Inference Engine**:
+  - Live LLM calls via Google Gemini API using `GEMINI_API_KEY` configured in the environment.
+  - Streaming or dynamic response delivery with robust error handling and loading indicators.
+- **Agent Persona (Socratic Inquisitor)**:
+  - Role: Critical collaborative thinking partner for independent researchers.
+  - Behaviors: Structures vague ideas into clear inquiry domains, challenges unexamined assumptions, identifies methodological constraints, and actively asks targeted questions rather than passive auto-completion.
+- **Persistence & Session Management**:
+  - Chat history and active messages persisted in `localStorage` across browser reloads.
+  - Ability to clear history or start a fresh session via the `+` (New Chat) action.
+- **Component Decomposition**:
+  - Modular chat feature architecture (`ChatContainer`, `ChatHeader`, `ChatMessageList`, `ChatMessageItem`, `ChatPromptInput`, `ChatEmptyState`) keeping individual components focused and under 250 lines.
 
-## 6. Tech Stack & Dependencies
+## 6. Explicit Out-of-Scope List
+- Autonomous backend file system mutations and real git cloning (deferred to later agentic tool phases).
+- Multi-agent orchestration frameworks (saved for future lifecycle phases).
+
+## 7. Tech Stack & Dependencies
 - **Framework**: React 19 + TypeScript
 - **Styling**: Tailwind CSS (VS Code Dark Modern palette)
 - **Icons**: Lucide React (`lucide-react`)
-- **Build Tool**: Vite
+- **Build Tool**: Vite (configured with `GEMINI_API_KEY` bridge)
+- **LLM API**: Google Gemini REST API / client integration
+
+## 8. Primary Chat Data Models
+- `ChatMessage`: `{ id: string; role: 'user' | 'assistant' | 'system'; content: string; timestamp: number; status?: 'sending' | 'streaming' | 'complete' | 'error' }`
+- `ChatSession`: `{ id: string; title: string; createdAt: number; updatedAt: number; messages: ChatMessage[] }`
+- `AIModelOption`: `{ id: string; name: string; provider: 'gemini' | 'mock'; description?: string }`
