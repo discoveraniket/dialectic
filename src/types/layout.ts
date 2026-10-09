@@ -2,6 +2,7 @@ export type ActivityBarItem =
   | 'explorer' 
   | 'search' 
   | 'source-control' 
+  | 'run-debug'
   | 'extensions'
   | 'settings';
 

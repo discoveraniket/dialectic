@@ -1,12 +1,11 @@
 import React from 'react';
 import { 
+  ArrowLeft,
+  ArrowRight,
   PanelLeft, 
   PanelBottom, 
   PanelRight, 
-  Search, 
-  Minus, 
-  Square, 
-  X
+  Search
 } from 'lucide-react';
 import { DialecticLogo } from '../brand/DialecticLogo';
 
@@ -30,38 +29,44 @@ export const TitleBar: React.FC<TitleBarProps> = ({
   onToggleSecondarySidebar,
 }) => {
   return (
-    <header className="h-[35px] bg-[#181818] border-b border-[#2b2b2b] flex items-center justify-between px-3 text-xs text-[#cccccc] select-none z-30 flex-shrink-0">
-      {/* Left: App Logo & Menus */}
-      <div className="flex items-center space-x-3">
-        <DialecticLogo size={18} showText={true} />
-
-        {/* Menu items */}
-        <nav className="hidden md:flex items-center space-x-2 text-[#cccccc] text-[11px] ml-2">
-          {['File', 'Edit', 'Selection', 'View', 'Go', 'Run', 'Terminal', 'Help'].map((item) => (
-            <button
-              key={item}
-              className="px-2 py-0.5 rounded hover:bg-[#2a2d2e] transition-colors text-[#cccccc]"
-            >
-              {item}
-            </button>
-          ))}
-        </nav>
+    <header className="h-[35px] bg-[#3c3c3c] flex items-center justify-between px-3 text-xs text-[#cccccc] select-none z-30 flex-shrink-0 font-sans">
+      {/* Left: Standalone App Logo Mark only (no text label) */}
+      <div className="flex items-center">
+        <DialecticLogo size={18} showText={false} />
       </div>
 
-      {/* Center: Command Center / Search Bar */}
-      <div className="flex-1 max-w-[480px] mx-4">
-        <div className="flex items-center justify-center bg-[#252526] hover:bg-[#2c2c2d] border border-[#3c3c3c] rounded px-3 py-1 cursor-pointer transition-colors group">
+      {/* Center: Navigation History (<- ->) placed directly adjacent to the Search box */}
+      <div className="flex-1 max-w-[560px] mx-4 flex items-center justify-center space-x-2">
+        {/* Navigation History: ← and → buttons */}
+        <div className="flex items-center space-x-1 text-[#858585]">
+          <button
+            title="Go Back (Alt+LeftArrow)"
+            disabled
+            className="p-1 text-[#555555] cursor-not-allowed rounded"
+          >
+            <ArrowLeft className="w-3.5 h-3.5" />
+          </button>
+          <button
+            title="Go Forward (Alt+RightArrow)"
+            disabled
+            className="p-1 text-[#555555] cursor-not-allowed rounded"
+          >
+            <ArrowRight className="w-3.5 h-3.5" />
+          </button>
+        </div>
+
+        {/* Command Center / Search Bar */}
+        <div className="flex-1 max-w-[460px] flex items-center justify-center bg-[#252526] hover:bg-[#2c2c2d] border border-[#3c3c3c] rounded px-3 py-1 cursor-pointer transition-colors group">
           <Search className="w-3.5 h-3.5 text-[#858585] group-hover:text-[#cccccc] mr-2" />
           <span className="text-[11px] text-[#858585] group-hover:text-[#cccccc] truncate">
-            {folderName ? `${folderName} (Ctrl+P)` : 'Visual Studio Code (Ctrl+P)'}
+            {folderName ? `${folderName} (Ctrl+P)` : 'Workspace'}
           </span>
         </div>
       </div>
 
-      {/* Right: Layout Toggles & Window Controls */}
-      <div className="flex items-center space-x-2">
-        {/* Layout action toggles */}
-        <div className="flex items-center border border-[#333333] rounded overflow-hidden mr-2 bg-[#1f1f1f]">
+      {/* Right: Layout Toggles */}
+      <div className="flex items-center space-x-1">
+        <div className="flex items-center border border-[#333333] rounded overflow-hidden bg-[#1f1f1f]">
           <button
             onClick={onTogglePrimarySidebar}
             title="Toggle Primary Side Bar (Ctrl+B)"
@@ -90,20 +95,9 @@ export const TitleBar: React.FC<TitleBarProps> = ({
             <PanelRight className="w-3.5 h-3.5" />
           </button>
         </div>
-
-        {/* Window controls */}
-        <div className="flex items-center space-x-1 text-[#858585]">
-          <button className="p-1 hover:bg-[#2a2d2e] hover:text-white rounded">
-            <Minus className="w-3 h-3" />
-          </button>
-          <button className="p-1 hover:bg-[#2a2d2e] hover:text-white rounded">
-            <Square className="w-2.5 h-2.5" />
-          </button>
-          <button className="p-1 hover:bg-[#e81123] hover:text-white rounded">
-            <X className="w-3 h-3" />
-          </button>
-        </div>
       </div>
     </header>
   );
 };
+
+export default TitleBar;

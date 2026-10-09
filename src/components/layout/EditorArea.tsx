@@ -5,11 +5,11 @@ import {
   MoreHorizontal, 
   FileCode,
   File,
-  ChevronRight,
-  Compass
+  ChevronRight
 } from 'lucide-react';
 import { EditorTab } from '../../types/layout';
 import { WelcomePage } from './WelcomePage';
+import { DialecticLogo } from '../brand/DialecticLogo';
 
 interface EditorAreaProps {
   openTabs: EditorTab[];
@@ -35,9 +35,9 @@ export const EditorArea: React.FC<EditorAreaProps> = ({
 
   return (
     <div className="flex-1 flex flex-col h-full bg-[#1e1e1e] overflow-hidden font-sans">
-      {/* Editor Tab Bar */}
-      <div className="h-[35px] bg-[#181818] border-b border-[#2b2b2b] flex items-center justify-between select-none overflow-x-auto flex-shrink-0">
-        <div className="flex items-center h-full overflow-x-auto">
+      {/* Editor Tab Bar: Tab strip with curved active tab */}
+      <div className="h-[35px] bg-[#252526] border-b border-[#2b2b2b] flex items-center justify-between select-none overflow-x-auto flex-shrink-0 px-1 pt-1">
+        <div className="flex items-end h-full overflow-x-auto space-x-1">
           {openTabs.map((tab) => {
             const isActive = tab.id === activeTabId;
             const isWelcome = tab.id === 'welcome';
@@ -46,25 +46,27 @@ export const EditorArea: React.FC<EditorAreaProps> = ({
               <div
                 key={tab.id}
                 onClick={() => onSelectTab(tab.id)}
-                className={`h-full flex items-center px-3 border-r border-[#2b2b2b] cursor-pointer group text-xs transition-colors ${
+                className={`h-[30px] flex items-center px-3 cursor-pointer group text-xs transition-colors rounded-t-md relative ${
                   isActive
-                    ? 'bg-[#1e1e1e] text-white border-t-2 border-t-[#007acc]'
-                    : 'bg-[#181818] text-[#858585] hover:text-[#cccccc] hover:bg-[#1f1f1f]'
+                    ? 'bg-[#1e1e1e] text-white border-t border-l border-r border-[#2b2b2b] -mb-[1px] z-10'
+                    : 'bg-transparent text-[#858585] hover:text-[#cccccc] hover:bg-[#2a2d2e]'
                 }`}
               >
                 {isWelcome ? (
-                  <Compass className="w-3.5 h-3.5 mr-2 text-[#007acc]" />
+                  <DialecticLogo size={14} className="mr-2 flex-shrink-0" />
                 ) : tab.title.endsWith('.md') ? (
-                  <File className="w-3.5 h-3.5 mr-2 text-[#4d9375]" />
+                  <File className="w-3.5 h-3.5 mr-2 text-[#4d9375] flex-shrink-0" />
                 ) : (
-                  <FileCode className="w-3.5 h-3.5 mr-2 text-[#61afef]" />
+                  <FileCode className="w-3.5 h-3.5 mr-2 text-[#61afef] flex-shrink-0" />
                 )}
 
-                <span className="truncate max-w-[160px] mr-2">{tab.title}</span>
+                <span className={`truncate max-w-[160px] mr-2 ${isWelcome ? 'italic' : ''}`}>
+                  {tab.title}
+                </span>
 
                 <button
                   onClick={(e) => onCloseTab(tab.id, e)}
-                  className="opacity-0 group-hover:opacity-100 hover:bg-[#333333] hover:text-white rounded p-0.5 transition-colors"
+                  className="opacity-60 group-hover:opacity-100 hover:bg-[#2a2d2e] hover:text-white rounded p-0.5 transition-all"
                 >
                   <X className="w-3 h-3" />
                 </button>
@@ -75,10 +77,10 @@ export const EditorArea: React.FC<EditorAreaProps> = ({
 
         {/* Tab actions on right */}
         <div className="flex items-center space-x-1 px-2 text-[#858585]">
-          <button title="Split Editor Right" className="p-1 hover:text-white hover:bg-[#2a2d2e] rounded">
+          <button title="Split Editor Right" className="p-1 hover:text-white hover:bg-[#2a2d2e] rounded transition-colors">
             <Split className="w-3.5 h-3.5" />
           </button>
-          <button title="More Editor Actions" className="p-1 hover:text-white hover:bg-[#2a2d2e] rounded">
+          <button title="More Editor Actions" className="p-1 hover:text-white hover:bg-[#2a2d2e] rounded transition-colors">
             <MoreHorizontal className="w-3.5 h-3.5" />
           </button>
         </div>
@@ -86,7 +88,7 @@ export const EditorArea: React.FC<EditorAreaProps> = ({
 
       {/* Breadcrumbs bar (only shown when viewing a file, not welcome page) */}
       {!isWelcomeActive && activeTab && (
-        <div className="h-[22px] px-3 bg-[#1e1e1e] border-b border-[#2b2b2b] flex items-center text-[11px] text-[#858585] flex-shrink-0">
+        <div className="h-[22px] px-3 bg-[#181818] border-b border-[#2b2b2b] flex items-center text-[11px] text-[#858585] flex-shrink-0">
           <span className="hover:text-white cursor-pointer">workspace</span>
           <ChevronRight className="w-3 h-3 mx-1 text-[#555555]" />
           <span className="text-[#cccccc] font-medium">{activeTab.title}</span>
@@ -96,7 +98,6 @@ export const EditorArea: React.FC<EditorAreaProps> = ({
       {/* Editor Content Area */}
       <div className="flex-1 overflow-y-auto bg-[#1e1e1e] relative">
         {isWelcomeActive ? (
-          /* VS CODE LANDING PAGE: Choose folder or create folder */
           <WelcomePage
             onOpenFolder={onOpenFolder}
             onNewFolder={onNewFolder}
@@ -127,3 +128,5 @@ export const EditorArea: React.FC<EditorAreaProps> = ({
     </div>
   );
 };
+
+export default EditorArea;

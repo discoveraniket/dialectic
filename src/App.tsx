@@ -12,8 +12,8 @@ import { ActivityBarItem, EditorTab, WorkspaceFolder } from './types/layout';
 export const App: React.FC = () => {
   // Panel Visibilities
   const [isPrimarySidebarOpen, setIsPrimarySidebarOpen] = useState(true);
-  const [isSecondarySidebarOpen, setIsSecondarySidebarOpen] = useState(false);
-  const [isBottomPanelOpen, setIsBottomPanelOpen] = useState(true);
+  const [isSecondarySidebarOpen, setIsSecondarySidebarOpen] = useState(true);
+  const [isBottomPanelOpen, setIsBottomPanelOpen] = useState(false);
   const [isBottomPanelMaximized, setIsBottomPanelMaximized] = useState(false);
 
   // Active Navigation
@@ -180,75 +180,88 @@ export const App: React.FC = () => {
         onToggleSecondarySidebar={() => setIsSecondarySidebarOpen(!isSecondarySidebarOpen)}
       />
 
-      {/* WORKBENCH BODY */}
-      <div className="flex-1 flex overflow-hidden relative">
+      {/* WORKBENCH BODY: Recessed Canvas with Floating Tiled Panels */}
+      <div className="flex-1 flex overflow-hidden relative bg-[#141414]">
         {/* 2. ACTIVITY BAR (FAR LEFT) */}
         <ActivityBar
           activeItem={activeActivityItem}
           onSelectItem={handleSelectActivityItem}
         />
 
-        {/* 3. PRIMARY SIDE BAR */}
-        {isPrimarySidebarOpen && (
-          <PrimarySideBar
-            activeView={activeActivityItem}
-            width={primaryWidth}
-            workspaceFolder={workspaceFolder}
-            onOpenFolderClick={handleOpenFolderClick}
-            onNewFolderClick={handleNewFolderClick}
-            onCloseFolder={handleCloseFolder}
-            onOpenTab={handleOpenTab}
-            onResizeStart={(e) => {
-              e.preventDefault();
-              isDraggingPrimary.current = true;
-              document.body.classList.add('cursor-col-resize');
-            }}
-          />
-        )}
+        {/* TILED PANELS CONTAINER (Gap & Padding) */}
+        <div className="flex-1 flex overflow-hidden p-1.5 gap-1.5 relative">
+          {/* 3. PRIMARY SIDE BAR TILE */}
+          {isPrimarySidebarOpen && (
+            <div 
+              style={{ width: `${primaryWidth}px` }}
+              className="h-full flex-shrink-0 rounded-lg border border-[#2b2b2b] bg-[#252526] overflow-hidden flex flex-col relative"
+            >
+              <PrimarySideBar
+                activeView={activeActivityItem}
+                width={primaryWidth}
+                workspaceFolder={workspaceFolder}
+                onOpenFolderClick={handleOpenFolderClick}
+                onNewFolderClick={handleNewFolderClick}
+                onCloseFolder={handleCloseFolder}
+                onOpenTab={handleOpenTab}
+                onResizeStart={(e) => {
+                  e.preventDefault();
+                  isDraggingPrimary.current = true;
+                  document.body.classList.add('cursor-col-resize');
+                }}
+              />
+            </div>
+          )}
 
-        {/* 4. MAIN CENTRAL WORKSPACE (EDITOR + BOTTOM PANEL) */}
-        <div className="flex-1 flex flex-col h-full overflow-hidden">
-          {/* EDITOR AREA (WITH WELCOME LANDING PAGE) */}
-          <div className="flex-1 overflow-hidden">
-            <EditorArea
-              openTabs={openTabs}
-              activeTabId={activeTabId}
-              onSelectTab={(id) => setActiveTabId(id)}
-              onCloseTab={handleCloseTab}
-              onOpenFolder={handleOpenFolderClick}
-              onNewFolder={handleNewFolderClick}
-              onNewFile={handleNewFile}
-            />
+          {/* 4. MAIN CENTRAL WORKSPACE TILE (EDITOR + BOTTOM PANEL) */}
+          <div className="flex-1 flex flex-col h-full rounded-lg border border-[#2b2b2b] bg-[#1e1e1e] overflow-hidden relative">
+            {/* EDITOR AREA (WITH WELCOME LANDING PAGE) */}
+            <div className="flex-1 overflow-hidden">
+              <EditorArea
+                openTabs={openTabs}
+                activeTabId={activeTabId}
+                onSelectTab={(id) => setActiveTabId(id)}
+                onCloseTab={handleCloseTab}
+                onOpenFolder={handleOpenFolderClick}
+                onNewFolder={handleNewFolderClick}
+                onNewFile={handleNewFile}
+              />
+            </div>
+
+            {/* 6. BOTTOM PANEL (CLEAN - NO TABS) */}
+            {isBottomPanelOpen && (
+              <BottomPanel
+                height={panelHeight}
+                isMaximized={isBottomPanelMaximized}
+                onToggleMaximize={() => setIsBottomPanelMaximized(!isBottomPanelMaximized)}
+                onClose={() => setIsBottomPanelOpen(false)}
+                onResizeStart={(e) => {
+                  e.preventDefault();
+                  isDraggingPanel.current = true;
+                  document.body.classList.add('cursor-row-resize');
+                }}
+              />
+            )}
           </div>
 
-          {/* 6. BOTTOM PANEL (CLEAN - NO TABS) */}
-          {isBottomPanelOpen && (
-            <BottomPanel
-              height={panelHeight}
-              isMaximized={isBottomPanelMaximized}
-              onToggleMaximize={() => setIsBottomPanelMaximized(!isBottomPanelMaximized)}
-              onClose={() => setIsBottomPanelOpen(false)}
-              onResizeStart={(e) => {
-                e.preventDefault();
-                isDraggingPanel.current = true;
-                document.body.classList.add('cursor-row-resize');
-              }}
-            />
+          {/* 5. SECONDARY SIDE BAR TILE (AUXILIARY BAR / CHAT) */}
+          {isSecondarySidebarOpen && (
+            <div 
+              style={{ width: `${secondaryWidth}px` }}
+              className="h-full flex-shrink-0 rounded-lg border border-[#2b2b2b] bg-[#252526] overflow-hidden flex flex-col relative"
+            >
+              <SecondarySideBar
+                width={secondaryWidth}
+                onClose={() => setIsSecondarySidebarOpen(false)}
+                onResizeStart={(e) => {
+                  e.preventDefault();
+                  isDraggingSecondary.current = true;
+                  document.body.classList.add('cursor-col-resize');
+                }}
+              />
+            </div>
           )}
         </div>
-
-        {/* 5. SECONDARY SIDE BAR (AUXILIARY BAR) */}
-        {isSecondarySidebarOpen && (
-          <SecondarySideBar
-            width={secondaryWidth}
-            onClose={() => setIsSecondarySidebarOpen(false)}
-            onResizeStart={(e) => {
-              e.preventDefault();
-              isDraggingSecondary.current = true;
-              document.body.classList.add('cursor-col-resize');
-            }}
-          />
-        )}
       </div>
 
       {/* 7. STATUS BAR */}

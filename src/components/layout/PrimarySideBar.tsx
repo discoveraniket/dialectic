@@ -5,8 +5,6 @@ import {
   MoreHorizontal, 
   FileCode,
   File,
-  FolderOpen,
-  FolderPlus,
   X
 } from 'lucide-react';
 import { ActivityBarItem, WorkspaceFolder } from '../../types/layout';
@@ -16,7 +14,7 @@ interface PrimarySideBarProps {
   width: number;
   workspaceFolder: WorkspaceFolder | null;
   onResizeStart: (e: React.MouseEvent) => void;
-  onOpenFolderClick: () => void;
+  onOpenFolderClick?: () => void;
   onNewFolderClick: () => void;
   onCloseFolder: () => void;
   onOpenTab: (tabId: string, title: string) => void;
@@ -24,14 +22,15 @@ interface PrimarySideBarProps {
 
 export const PrimarySideBar: React.FC<PrimarySideBarProps> = ({
   activeView,
-  width,
+  width: _width,
   workspaceFolder,
   onResizeStart,
   onOpenFolderClick,
-  onNewFolderClick,
+  onNewFolderClick: _onNewFolderClick,
   onCloseFolder,
   onOpenTab,
 }) => {
+  const [isNoFolderOpen, setIsNoFolderOpen] = useState(true);
   const [isWorkspaceFolderOpen, setIsWorkspaceFolderOpen] = useState(true);
   const [isOutlineOpen, setIsOutlineOpen] = useState(false);
   const [isTimelineOpen, setIsTimelineOpen] = useState(false);
@@ -39,25 +38,32 @@ export const PrimarySideBar: React.FC<PrimarySideBarProps> = ({
   const getHeaderTitle = () => {
     switch (activeView) {
       case 'explorer':
-        return workspaceFolder ? `EXPLORER: ${workspaceFolder.name.toUpperCase()}` : 'EXPLORER: NO FOLDER OPENED';
+        return workspaceFolder ? `Explorer: ${workspaceFolder.name}` : 'Explorer';
       case 'search':
-        return 'SEARCH';
+        return 'Search';
       case 'source-control':
-        return 'SOURCE CONTROL';
+        return 'Source Control';
+      case 'run-debug':
+        return 'Run and Debug';
       case 'extensions':
-        return 'EXTENSIONS';
+        return 'Extensions';
       default:
-        return 'SIDE BAR';
+        return 'Side Bar';
+    }
+  };
+
+  const handleOpenAction = () => {
+    if (onOpenFolderClick) {
+      onOpenFolderClick();
     }
   };
 
   return (
     <div 
-      style={{ width: `${width}px` }} 
-      className="h-full bg-[#181818] border-r border-[#2b2b2b] flex flex-col select-none relative flex-shrink-0 z-10 font-sans"
+      className="w-full h-full bg-[#252526] flex flex-col select-none relative z-10 font-sans"
     >
       {/* Side Bar Header */}
-      <div className="h-[35px] px-4 flex items-center justify-between border-b border-[#2b2b2b] text-[11px] font-semibold tracking-wider text-[#cccccc]">
+      <div className="h-[35px] px-4 flex items-center justify-between border-b border-[#2b2b2b] text-[11px] font-semibold text-[#cccccc]">
         <span className="truncate">{getHeaderTitle()}</span>
         <button className="text-[#858585] hover:text-white p-1 rounded">
           <MoreHorizontal className="w-4 h-4" />
@@ -70,26 +76,71 @@ export const PrimarySideBar: React.FC<PrimarySideBarProps> = ({
           <>
             {/* Case A: No Folder Opened */}
             {!workspaceFolder ? (
-              <div className="p-4 space-y-3">
-                <p className="text-xs text-[#858585] leading-relaxed">
-                  You have not yet opened a folder.
-                </p>
-                <div className="space-y-2 pt-1">
-                  <button
-                    onClick={onOpenFolderClick}
-                    className="w-full py-1.5 px-3 bg-[#007acc] hover:bg-[#0062a3] text-white rounded text-xs font-medium flex items-center justify-center space-x-2 transition-colors"
-                  >
-                    <FolderOpen className="w-3.5 h-3.5" />
-                    <span>Open Folder</span>
-                  </button>
-                  <button
-                    onClick={onNewFolderClick}
-                    className="w-full py-1.5 px-3 bg-[#2a2d2e] hover:bg-[#333333] border border-[#3c3c3c] text-[#cccccc] hover:text-white rounded text-xs font-medium flex items-center justify-center space-x-2 transition-colors"
-                  >
-                    <FolderPlus className="w-3.5 h-3.5" />
-                    <span>Create New Folder</span>
-                  </button>
+              <div className="space-y-0.5">
+                {/* Accordion: No Folder Opened */}
+                <div 
+                  onClick={() => setIsNoFolderOpen(!isNoFolderOpen)}
+                  className="flex items-center px-3 py-1 text-[#cccccc] font-semibold text-[11px] cursor-pointer hover:bg-[#2a2d2e] select-none"
+                >
+                  {isNoFolderOpen ? (
+                    <ChevronDown className="w-3.5 h-3.5 mr-1 text-[#858585]" />
+                  ) : (
+                    <ChevronRight className="w-3.5 h-3.5 mr-1 text-[#858585]" />
+                  )}
+                  <span>No Folder Opened</span>
                 </div>
+
+                {isNoFolderOpen && (
+                  <div className="px-4 py-2 space-y-3">
+                    <p className="text-xs text-[#858585] leading-relaxed">
+                      You have not yet opened a folder.
+                    </p>
+
+                    <div className="space-y-2">
+                      {/* Primary Open Folder */}
+                      <button
+                        onClick={handleOpenAction}
+                        className="w-full py-1.5 px-3 bg-[#0078d4] hover:bg-[#026ec1] text-white rounded text-xs font-medium flex items-center justify-center transition-colors cursor-pointer shadow-sm"
+                      >
+                        Open Folder
+                      </button>
+
+                      {/* Secondary Open Recent */}
+                      <button
+                        onClick={handleOpenAction}
+                        className="w-full py-1.5 px-3 bg-[#313131] hover:bg-[#3c3c3c] border border-[#3c3c3c] text-white rounded text-xs font-medium flex items-center justify-center transition-colors cursor-pointer"
+                      >
+                        Open Recent
+                      </button>
+                    </div>
+
+                    {/* Tunnel note & action */}
+                    <div className="pt-1 space-y-1.5">
+                      <p className="text-[11px] text-[#858585] leading-relaxed">
+                        To connect to a machine that has Remote Tunnel Access enabled or learn about how to do that, click here:
+                      </p>
+                      <button
+                        onClick={handleOpenAction}
+                        className="w-full py-1.5 px-3 bg-[#0078d4] hover:bg-[#026ec1] text-white rounded text-xs font-medium flex items-center justify-center transition-colors cursor-pointer shadow-sm"
+                      >
+                        Connect to Tunnel...
+                      </button>
+                    </div>
+
+                    {/* Remote repository note & action */}
+                    <div className="pt-1 space-y-1.5">
+                      <p className="text-[11px] text-[#858585] leading-relaxed">
+                        You can open a remote repository or pull request without cloning.
+                      </p>
+                      <button
+                        onClick={handleOpenAction}
+                        className="w-full py-1.5 px-3 bg-[#0078d4] hover:bg-[#026ec1] text-white rounded text-xs font-medium flex items-center justify-center transition-colors cursor-pointer shadow-sm"
+                      >
+                        Open Remote Repository
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
             ) : (
               /* Case B: Folder Is Opened */
@@ -148,14 +199,14 @@ export const PrimarySideBar: React.FC<PrimarySideBarProps> = ({
             <div className="mt-2 border-t border-[#252526]">
               <div 
                 onClick={() => setIsOutlineOpen(!isOutlineOpen)}
-                className="flex items-center px-2 py-1 text-[#cccccc] font-bold text-[11px] cursor-pointer hover:bg-[#2a2d2e] select-none uppercase tracking-wide"
+                className="flex items-center px-3 py-1 text-[#cccccc] font-semibold text-[11px] cursor-pointer hover:bg-[#2a2d2e] select-none"
               >
                 {isOutlineOpen ? (
                   <ChevronDown className="w-3.5 h-3.5 mr-1 text-[#858585]" />
                 ) : (
                   <ChevronRight className="w-3.5 h-3.5 mr-1 text-[#858585]" />
                 )}
-                <span>OUTLINE</span>
+                <span>Outline</span>
               </div>
               {isOutlineOpen && (
                 <div className="pl-6 pr-2 py-2 text-[11px] text-[#858585]">
@@ -168,14 +219,14 @@ export const PrimarySideBar: React.FC<PrimarySideBarProps> = ({
             <div className="mt-1 border-t border-[#252526]">
               <div 
                 onClick={() => setIsTimelineOpen(!isTimelineOpen)}
-                className="flex items-center px-2 py-1 text-[#cccccc] font-bold text-[11px] cursor-pointer hover:bg-[#2a2d2e] select-none uppercase tracking-wide"
+                className="flex items-center px-3 py-1 text-[#cccccc] font-semibold text-[11px] cursor-pointer hover:bg-[#2a2d2e] select-none"
               >
                 {isTimelineOpen ? (
                   <ChevronDown className="w-3.5 h-3.5 mr-1 text-[#858585]" />
                 ) : (
                   <ChevronRight className="w-3.5 h-3.5 mr-1 text-[#858585]" />
                 )}
-                <span>TIMELINE</span>
+                <span>Timeline</span>
               </div>
               {isTimelineOpen && (
                 <div className="pl-6 pr-2 py-2 text-[11px] text-[#858585]">
@@ -205,6 +256,13 @@ export const PrimarySideBar: React.FC<PrimarySideBarProps> = ({
           </div>
         )}
 
+        {/* Run and Debug View */}
+        {activeView === 'run-debug' && (
+          <div className="p-3 text-[11px] text-[#858585]">
+            No debug configurations registered.
+          </div>
+        )}
+
         {/* Extensions View */}
         {activeView === 'extensions' && (
           <div className="p-3 space-y-2">
@@ -226,3 +284,5 @@ export const PrimarySideBar: React.FC<PrimarySideBarProps> = ({
     </div>
   );
 };
+
+export default PrimarySideBar;
