@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useChat } from '../../hooks/useChat';
 import { ChatMessage } from '../../types/chat';
 import { ChatHeader } from './ChatHeader';
 import { ChatMessageList } from './ChatMessageList';
@@ -21,43 +22,50 @@ export const ChatContainer: React.FC<ChatContainerProps> = ({
   onToggleMaximize,
   onClose,
   messages: externalMessages,
-  isLoading = false,
+  isLoading: externalIsLoading,
   onSendMessage,
   onNewChat,
-  selectedModelName = 'Auto',
+  selectedModelName,
   onSelectModel,
 }) => {
-  const [internalPrompt, setInternalPrompt] = useState('');
-  const [internalMessages, setInternalMessages] = useState<ChatMessage[]>([]);
+  const [inputPrompt, setInputPrompt] = useState('');
+  const chatHook = useChat();
 
-  const messages = externalMessages ?? internalMessages;
+  const messages = externalMessages ?? chatHook.messages;
+  const isLoading = externalIsLoading ?? chatHook.isLoading;
 
   const handleSubmit = () => {
-    const text = internalPrompt.trim();
-    if (!text) return;
+    const text = inputPrompt.trim();
+    if (!text || isLoading) return;
 
     if (onSendMessage) {
       onSendMessage(text);
     } else {
-      // Local placeholder fallback for zero-regression during refactoring phase
-      const userMsg: ChatMessage = {
-        id: `msg-${Date.now()}`,
-        role: 'user',
-        content: text,
-        timestamp: Date.now(),
-        status: 'complete',
-      };
-      setInternalMessages((prev) => [...prev, userMsg]);
+      chatHook.sendMessage(text);
     }
-    setInternalPrompt('');
+    setInputPrompt('');
   };
 
-  const handleResetChat = () => {
+  const handleReset = () => {
     if (onNewChat) {
       onNewChat();
     } else {
-      setInternalMessages([]);
+      chatHook.newChat();
     }
+  };
+
+  const currentModelId = chatHook.selectedModel;
+  const modelLabel =
+    selectedModelName ??
+    (currentModelId === 'auto'
+      ? 'Auto'
+      : currentModelId);
+
+  const handleSelectModel = (modelId: string) => {
+    if (onSelectModel) {
+      onSelectModel();
+    }
+    chatHook.setSelectedModel(modelId);
   };
 
   return (
@@ -67,24 +75,25 @@ export const ChatContainer: React.FC<ChatContainerProps> = ({
         isMaximized={isMaximized}
         onToggleMaximize={onToggleMaximize}
         onClose={onClose}
-        onNewChat={handleResetChat}
+        onNewChat={handleReset}
       />
 
       {/* 2. Message History Feed or Empty State */}
       <ChatMessageList
         messages={messages}
         isLoading={isLoading}
-        
+        onEmptyStateAction={() => setInputPrompt('I want to define my research boundaries and constraints. Challenge my assumptions.')}
       />
 
       {/* 3. Bottom Prompt Box with 4 unboxed controls */}
       <ChatPromptInput
-        value={internalPrompt}
-        onChange={setInternalPrompt}
+        value={inputPrompt}
+        onChange={setInputPrompt}
         onSubmit={handleSubmit}
         isLoading={isLoading}
-        selectedModelName={selectedModelName}
-        onSelectModel={onSelectModel}
+        selectedModelId={currentModelId}
+        selectedModelName={modelLabel}
+        onSelectModel={handleSelectModel}
       />
     </div>
   );

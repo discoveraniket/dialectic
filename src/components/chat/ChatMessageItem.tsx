@@ -16,6 +16,50 @@ export const ChatMessageItem: React.FC<ChatMessageItemProps> = ({ message }) => 
     setTimeout(() => setCopied(false), 2000);
   };
 
+  // Render message content with code fence parsing
+  const renderFormattedContent = (content: string) => {
+    if (!content.includes('```')) {
+      return (
+        <span className="whitespace-pre-wrap break-words">{content}</span>
+      );
+    }
+
+    const segments = content.split(/(```[\s\S]*?```)/g);
+
+    return segments.map((segment, idx) => {
+      if (segment.startsWith('```') && segment.endsWith('```')) {
+        const lines = segment.slice(3, -3).trim().split('\n');
+        const language = lines[0].match(/^[a-zA-Z0-9_-]+$/) ? lines[0] : '';
+        const codeText = language ? lines.slice(1).join('\n') : lines.join('\n');
+
+        return (
+          <div key={idx} className="my-2 rounded bg-[#141414] border border-[#2b2b2b] overflow-hidden">
+            <div className="flex items-center justify-between px-2.5 py-1 bg-[#1a1a1a] text-[10px] text-[#888888] border-b border-[#2b2b2b]">
+              <span>{language || 'code'}</span>
+              <button
+                type="button"
+                onClick={() => navigator.clipboard.writeText(codeText)}
+                className="hover:text-white transition-colors cursor-pointer"
+                title="Copy code"
+              >
+                Copy
+              </button>
+            </div>
+            <pre className="p-2.5 text-[11px] font-mono text-[#d4d4d4] overflow-x-auto whitespace-pre">
+              {codeText}
+            </pre>
+          </div>
+        );
+      }
+
+      return (
+        <span key={idx} className="whitespace-pre-wrap break-words">
+          {segment}
+        </span>
+      );
+    });
+  };
+
   return (
     <div className={`flex flex-col space-y-1.5 p-3 rounded-lg text-xs leading-relaxed transition-colors ${
       isUser 
@@ -48,8 +92,8 @@ export const ChatMessageItem: React.FC<ChatMessageItemProps> = ({ message }) => 
       </div>
 
       {/* Message Content */}
-      <div className="text-[#cccccc] whitespace-pre-wrap break-words font-sans selection:bg-[#264f78]">
-        {message.content}
+      <div className="text-[#cccccc] font-sans selection:bg-[#264f78]">
+        {renderFormattedContent(message.content)}
         {message.status === 'streaming' && (
           <span className="inline-block w-1.5 h-3.5 ml-1 bg-[#38bdf8] animate-pulse align-middle" />
         )}

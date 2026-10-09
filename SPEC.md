@@ -53,15 +53,24 @@ Researchers, developers, and knowledge workers seeking the modern IDE layout fou
 ## 5. Functional Chat & Socratic Inquisitor Architecture
 - **Inference Engine**:
   - Live LLM calls via Google Gemini API using `GEMINI_API_KEY` configured in the environment.
+  - Quick Models selection with `gemini-3.1-flash-lite` as the default model:
+    - `gemini-3.1-flash-lite` [Default]
+    - `gemini-3.5-flash-lite`
+    - `gemini-3.8-flash`
+  - Model Selector Popover matching VS Code style:
+    - Anchored above model button in the prompt card.
+    - Search input (`Search models`).
+    - Model list with active checkmark `✓`.
+    - Internal divider line and `Manage Models...` action item.
   - Streaming or dynamic response delivery with robust error handling and loading indicators.
 - **Agent Persona (Socratic Inquisitor)**:
   - Role: Critical collaborative thinking partner for independent researchers.
   - Behaviors: Structures vague ideas into clear inquiry domains, challenges unexamined assumptions, identifies methodological constraints, and actively asks targeted questions rather than passive auto-completion.
 - **Persistence & Session Management**:
-  - Chat history and active messages persisted in `localStorage` across browser reloads.
+  - Chat history, active messages, and chosen model persisted in `localStorage` across browser reloads.
   - Ability to clear history or start a fresh session via the `+` (New Chat) action.
 - **Component Decomposition**:
-  - Modular chat feature architecture (`ChatContainer`, `ChatHeader`, `ChatMessageList`, `ChatMessageItem`, `ChatPromptInput`, `ChatEmptyState`) keeping individual components focused and under 250 lines.
+  - Modular chat feature architecture (`ChatContainer`, `ChatHeader`, `ChatMessageList`, `ChatMessageItem`, `ChatPromptInput`, `ModelSelectorPopover`, `ChatEmptyState`) keeping individual components focused and under 250 lines.
 
 ## 6. Explicit Out-of-Scope List
 - Autonomous backend file system mutations and real git cloning (deferred to later agentic tool phases).

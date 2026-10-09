@@ -49,8 +49,15 @@
 - [x] Task 6.4: Restructuring Verification — Run `npm run build` to confirm zero regression in layout, styling, and functionality before any feature logic is introduced.
 
 ## Phase 7: Functional Chat & Gemini Live Integration
-- [ ] Task 7.1: Configure `vite.config.ts` to bridge `process.env.GEMINI_API_KEY` into client environment, and create `.env.example` without exposing secrets.
-- [ ] Task 7.2: Implement `src/services/geminiService.ts` for live Google Gemini API calls, incorporating Socratic Inquisitor system instructions, model fallback, and robust error handling.
-- [ ] Task 7.3: Implement `src/hooks/useChat.ts` managing message state, loading lifecycle, abort controller, and `localStorage` persistence across browser reloads.
-- [ ] Task 7.4: Wire `useChat` into `ChatContainer`, enabling live message sending, interactive chat stream/response, and session reset.
-- [ ] Task 7.5: Verification — Run `npm run build` and verify end-to-end live conversational research dialogue with the Socratic agent.
+- [x] Task 7.1: Configure `vite.config.ts` to bridge `process.env.GEMINI_API_KEY` into client environment, and create `.env.example` without exposing secrets.
+- [x] Task 7.2: Implement `src/services/geminiService.ts` for live Google Gemini API calls, incorporating Socratic Inquisitor system instructions, model fallback, and robust error handling.
+- [x] Task 7.3: Implement `src/hooks/useChat.ts` managing message state, loading lifecycle, abort controller, and `localStorage` persistence across browser reloads.
+- [x] Task 7.4: Wire `useChat` into `ChatContainer`, enabling live message sending, interactive chat stream/response, and session reset.
+- [x] Task 7.5: Verification — Run `npm run build` and verify end-to-end live conversational research dialogue with the Socratic agent.
+
+## Phase 8: Quick Models Selector Popover
+- [x] Task 8.1: Update `src/types/chat.ts` with quick model definitions (`gemini-3.1-flash-lite` [Default], `gemini-3.5-flash-lite`, `gemini-3.8-flash`).
+- [x] Task 8.2: Update `src/services/geminiService.ts` and `src/hooks/useChat.ts` to set `gemini-3.1-flash-lite` as default and persist chosen model in `localStorage`.
+- [x] Task 8.3: Implement `src/components/chat/ModelSelectorPopover.tsx` matching the reference UI (search input, active checkmark `✓`, divider, "Manage Models..." action, and outside-click handler).
+- [x] Task 8.4: Wire `ModelSelectorPopover` into `ChatPromptInput.tsx` and `ChatContainer.tsx` with active button toggle styling.
+- [x] Task 8.5: Verification — Run `npm run build` and verify model switcher presentation and behavior.

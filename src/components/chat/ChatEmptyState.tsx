@@ -4,7 +4,7 @@ interface ChatEmptyStateProps {
   onActionClick?: () => void;
 }
 
-export const ChatEmptyState: React.FC<ChatEmptyStateProps> = () => {
+export const ChatEmptyState: React.FC<ChatEmptyStateProps> = ({ onActionClick }) => {
   return (
     <div className="flex-1 overflow-y-auto p-6 flex flex-col items-center justify-center text-center space-y-3 select-none">
       {/* Agent Speech Bubble with Sparkles Icon */}
@@ -31,6 +31,12 @@ export const ChatEmptyState: React.FC<ChatEmptyStateProps> = () => {
         <p className="text-xs text-[#858585] mt-1">
           AI responses may be inaccurate
         </p>
+        <button
+          onClick={onActionClick}
+          className="text-xs text-[#3794ff] hover:underline cursor-pointer mt-2 leading-relaxed block max-w-[260px] mx-auto"
+        >
+          Pose a research idea to begin Socratic interrogation.
+        </button>
       </div>
     </div>
   );
