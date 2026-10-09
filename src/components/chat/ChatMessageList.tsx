@@ -8,12 +8,14 @@ interface ChatMessageListProps {
   messages: ChatMessage[];
   isLoading?: boolean;
   onEmptyStateAction?: () => void;
+  onDeleteMessage?: (id: string) => void;
 }
 
 export const ChatMessageList: React.FC<ChatMessageListProps> = ({
   messages,
   isLoading = false,
   onEmptyStateAction,
+  onDeleteMessage,
 }) => {
   const scrollEndRef = useRef<HTMLDivElement>(null);
 
@@ -28,7 +30,11 @@ export const ChatMessageList: React.FC<ChatMessageListProps> = ({
   return (
     <div className="flex-1 overflow-y-auto p-3 space-y-3 scrollbar-thin scrollbar-thumb-[#333333]">
       {messages.map((message) => (
-        <ChatMessageItem key={message.id} message={message} />
+        <ChatMessageItem
+          key={message.id}
+          message={message}
+          onDelete={onDeleteMessage}
+        />
       ))}
 
       {isLoading && messages[messages.length - 1]?.role === 'user' && (
@@ -42,3 +48,5 @@ export const ChatMessageList: React.FC<ChatMessageListProps> = ({
     </div>
   );
 };
+
+export default ChatMessageList;

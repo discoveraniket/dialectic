@@ -63,6 +63,20 @@ Researchers, developers, and knowledge workers seeking the modern IDE layout fou
     - Model list with active checkmark `✓`.
     - Internal divider line and `Manage Models...` action item.
   - Streaming or dynamic response delivery with robust error handling and loading indicators.
+  - **Collapsible Thinking Disclosure**:
+    - Surfaces internal reasoning/chain-of-thought in an expandable drawer above the agent output.
+    - Features duration indicator (e.g. `Thought for 1.4s ▾`) and defaults to collapsed.
+  - **Formatted Markdown & LaTeX Rendering**:
+    - Rich formatting for headings, bullet points, and code blocks.
+    - Mathematical notation support for research equations (inline `$...$` and display `$$...$$`).
+  - **Message Tile Actions**:
+    - Individual copy button (copies raw text) and delete button (removes message from session).
+  - **Performance Metrics Bar (Agent Replies)**:
+    - Displayed directly below assistant messages in a subtle metadata strip:
+      - `TTFT` (Time To First Token in ms).
+      - `tok/s` (Generation speed in tokens per second).
+      - `Context size` (Input context tokens).
+      - `Total time` (Overall duration in seconds).
 - **Agent Persona (Socratic Inquisitor)**:
   - Role: Critical collaborative thinking partner for independent researchers.
   - Behaviors: Structures vague ideas into clear inquiry domains, challenges unexamined assumptions, identifies methodological constraints, and actively asks targeted questions rather than passive auto-completion.
@@ -70,7 +84,7 @@ Researchers, developers, and knowledge workers seeking the modern IDE layout fou
   - Chat history, active messages, and chosen model persisted in `localStorage` across browser reloads.
   - Ability to clear history or start a fresh session via the `+` (New Chat) action.
 - **Component Decomposition**:
-  - Modular chat feature architecture (`ChatContainer`, `ChatHeader`, `ChatMessageList`, `ChatMessageItem`, `ChatPromptInput`, `ModelSelectorPopover`, `ChatEmptyState`) keeping individual components focused and under 250 lines.
+  - Modular chat feature architecture (`ChatContainer`, `ChatHeader`, `ChatMessageList`, `ChatMessageItem`, `ChatPromptInput`, `ModelSelectorPopover`, `ReasoningDisclosure`, `PerformanceMetricsBar`, `ChatEmptyState`) keeping individual components focused and under 250 lines.
 
 ## 6. Explicit Out-of-Scope List
 - Autonomous backend file system mutations and real git cloning (deferred to later agentic tool phases).
@@ -84,6 +98,7 @@ Researchers, developers, and knowledge workers seeking the modern IDE layout fou
 - **LLM API**: Google Gemini REST API / client integration
 
 ## 8. Primary Chat Data Models
-- `ChatMessage`: `{ id: string; role: 'user' | 'assistant' | 'system'; content: string; timestamp: number; status?: 'sending' | 'streaming' | 'complete' | 'error' }`
+- `ChatMessage`: `{ id: string; role: 'user' | 'assistant' | 'system'; content: string; thinking?: string; timestamp: number; status?: 'sending' | 'streaming' | 'complete' | 'error'; metrics?: PerformanceMetrics }`
+- `PerformanceMetrics`: `{ ttftMs?: number; totalTimeMs?: number; tokensPerSec?: number; contextTokens?: number; totalTokens?: number }`
 - `ChatSession`: `{ id: string; title: string; createdAt: number; updatedAt: number; messages: ChatMessage[] }`
 - `AIModelOption`: `{ id: string; name: string; provider: 'gemini' | 'mock'; description?: string }`

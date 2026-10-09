@@ -5,20 +5,48 @@ import { sendChatMessageToGemini, DEFAULT_MODEL } from '../services/geminiServic
 const STORAGE_KEY = 'dialectic_chat_messages_v1';
 const MODEL_STORAGE_KEY = 'dialectic_selected_model_v1';
 
+const INITIAL_DEMO_MESSAGES: ChatMessage[] = [
+  {
+    id: 'msg-user-demo-1',
+    role: 'user',
+    content:
+      'I want to formulate a kinetic equation for enzyme transition states using sequence features. What is the fundamental relation for transition state theory?',
+    timestamp: Date.now() - 60000,
+    status: 'complete',
+  },
+  {
+    id: 'msg-agent-demo-1',
+    role: 'assistant',
+    thinking:
+      '1. Deconstructing kinetic parameters: k_cat relates directly to transition state free energy barrier ΔG‡ via Eyring-Polanyi equation.\n2. Flagging unexamined assumptions: Sequence embeddings predict ground state structures reliably, but transition states involve femtosecond vibrational modes.\n3. Identifying research bottleneck: Without structural or solvent coordinates, pure sequence predictions are statistical correlations rather than causal biophysics.',
+    content:
+      '### Transition State Epistemic Formulation\n\nUnder **Eyring-Polanyi Transition State Theory**, the catalytic rate constant $k_{cat}$ is fundamentally related to the free energy of activation $\\Delta G^{\\ddagger}$:\n\n$$k_{cat} = \\frac{k_B T}{h} \\exp\\left(-\\frac{\\Delta G^{\\ddagger}}{RT}\\right)$$\n\nWhere:\n- $k_B$ is the **Boltzmann constant**\n- $h$ is **Planck\'s constant**\n- $R$ is the universal gas constant\n- $T$ is absolute temperature\n\n### Socratic Probing\n1. How does your sequence model plan to account for **transition state stabilization** versus simple substrate ground-state binding affinity ($K_m$)?\n2. Have you isolated negative baseline controls to prevent memorization of homology families?',
+    timestamp: Date.now() - 30000,
+    status: 'complete',
+    metrics: {
+      ttftMs: 148,
+      totalTimeMs: 1620,
+      tokensPerSec: 54.3,
+      contextTokens: 184,
+      outputTokens: 290,
+    },
+  },
+];
+
 export function useChat() {
   const [messages, setMessages] = useState<ChatMessage[]>(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEY);
       if (saved) {
         const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed)) {
+        if (Array.isArray(parsed) && parsed.length > 0) {
           return parsed;
         }
       }
     } catch (e) {
       console.warn('Failed to restore chat messages from localStorage:', e);
     }
-    return [];
+    return INITIAL_DEMO_MESSAGES;
   });
 
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -95,14 +123,20 @@ export function useChat() {
       abortControllerRef.current = controller;
 
       try {
-        const finalText = await sendChatMessageToGemini(updatedHistory, {
+        const result = await sendChatMessageToGemini(updatedHistory, {
           model: selectedModel,
           signal: controller.signal,
-          onChunk: (_chunk, accumulated) => {
+          onChunk: (_chunk, parsed) => {
             setMessages((prev) =>
               prev.map((msg) =>
                 msg.id === assistantMessageId
-                  ? { ...msg, content: accumulated, status: 'streaming' }
+                  ? {
+                      ...msg,
+                      content: parsed.content,
+                      thinking: parsed.thinking,
+                      metrics: parsed.metrics,
+                      status: 'streaming',
+                    }
                   : msg
               )
             );
@@ -112,7 +146,13 @@ export function useChat() {
         setMessages((prev) =>
           prev.map((msg) =>
             msg.id === assistantMessageId
-              ? { ...msg, content: finalText, status: 'complete' }
+              ? {
+                  ...msg,
+                  content: result.content,
+                  thinking: result.thinking,
+                  metrics: result.metrics,
+                  status: 'complete',
+                }
               : msg
           )
         );
@@ -149,6 +189,10 @@ export function useChat() {
     [messages, isLoading, selectedModel]
   );
 
+  const deleteMessage = useCallback((id: string) => {
+    setMessages((prev) => prev.filter((msg) => msg.id !== id));
+  }, []);
+
   const newChat = useCallback(() => {
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
@@ -176,6 +220,7 @@ export function useChat() {
     selectedModel,
     setSelectedModel,
     sendMessage,
+    deleteMessage,
     newChat,
     abort,
   };

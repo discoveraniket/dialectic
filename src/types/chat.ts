@@ -2,13 +2,23 @@ export type MessageRole = 'user' | 'assistant' | 'system';
 
 export type MessageStatus = 'sending' | 'streaming' | 'complete' | 'error';
 
+export interface PerformanceMetrics {
+  ttftMs?: number;        // Time To First Token in ms
+  totalTimeMs?: number;   // Total generation duration in ms
+  tokensPerSec?: number;  // Generation speed in tokens/sec
+  contextTokens?: number; // Input prompt context size estimation
+  outputTokens?: number;  // Generated output token count estimation
+}
+
 export interface ChatMessage {
   id: string;
   role: MessageRole;
   content: string;
+  thinking?: string;
   timestamp: number;
   status?: MessageStatus;
   error?: string;
+  metrics?: PerformanceMetrics;
 }
 
 export interface ChatSession {

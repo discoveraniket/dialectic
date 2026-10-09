@@ -61,3 +61,11 @@
 - [x] Task 8.3: Implement `src/components/chat/ModelSelectorPopover.tsx` matching the reference UI (search input, active checkmark `✓`, divider, "Manage Models..." action, and outside-click handler).
 - [x] Task 8.4: Wire `ModelSelectorPopover` into `ChatPromptInput.tsx` and `ChatContainer.tsx` with active button toggle styling.
 - [x] Task 8.5: Verification — Run `npm run build` and verify model switcher presentation and behavior.
+
+## Phase 9: Agentic Turn UI Polish (Collapsible Thinking, Markdown-LaTeX, Tile Actions & Performance Metrics)
+- [x] Task 9.1: Update `src/types/chat.ts` with `PerformanceMetrics` type and enrich `ChatMessage` with `thinking` and `metrics`.
+- [x] Task 9.2: Update `src/services/geminiService.ts` to support thinking blocks and telemetry, and update `src/hooks/useChat.ts` to track TTFT, tok/sec, context size, elapsed time, and message deletion.
+- [x] Task 9.3: Implement `src/components/chat/ReasoningDisclosure.tsx` for collapsible thinking disclosure with duration tag.
+- [x] Task 9.4: Implement `src/components/chat/PerformanceMetricsBar.tsx` rendering TTFT, tok/s, context size, and total time.
+- [x] Task 9.5: Update `src/components/chat/ChatMessageItem.tsx` and list with copy/delete tile buttons, collapsible thinking, LaTeX/Markdown rendering, and performance metrics strip.
+- [x] Task 9.6: Verification — Run `npm run build` and verify thinking disclosure, LaTeX math, copy/delete actions, and performance metrics.

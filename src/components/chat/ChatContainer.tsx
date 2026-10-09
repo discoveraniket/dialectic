@@ -82,6 +82,7 @@ export const ChatContainer: React.FC<ChatContainerProps> = ({
       <ChatMessageList
         messages={messages}
         isLoading={isLoading}
+        onDeleteMessage={chatHook.deleteMessage}
         onEmptyStateAction={() => setInputPrompt('I want to define my research boundaries and constraints. Challenge my assumptions.')}
       />
 
