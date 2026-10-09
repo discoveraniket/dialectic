@@ -13,7 +13,7 @@ interface PrimarySideBarProps {
   activeView: ActivityBarItem;
   width: number;
   workspaceFolder: WorkspaceFolder | null;
-  onResizeStart: (e: React.MouseEvent) => void;
+  onResizeStart?: (e: React.MouseEvent) => void;
   onOpenFolderClick?: () => void;
   onNewFolderClick: () => void;
   onCloseFolder: () => void;
@@ -24,7 +24,7 @@ export const PrimarySideBar: React.FC<PrimarySideBarProps> = ({
   activeView,
   width: _width,
   workspaceFolder,
-  onResizeStart,
+  onResizeStart: _onResizeStart,
   onOpenFolderClick,
   onNewFolderClick: _onNewFolderClick,
   onCloseFolder,
@@ -60,10 +60,10 @@ export const PrimarySideBar: React.FC<PrimarySideBarProps> = ({
 
   return (
     <div 
-      className="w-full h-full bg-[#252526] flex flex-col select-none relative z-10 font-sans"
+      className="w-full h-full bg-[#181818] flex flex-col select-none relative z-10 font-sans"
     >
-      {/* Side Bar Header */}
-      <div className="h-[35px] px-4 flex items-center justify-between border-b border-[#2b2b2b] text-[11px] font-semibold text-[#cccccc]">
+      {/* Side Bar Header (Borderless) */}
+      <div className="h-[35px] px-4 flex items-center justify-between text-[11px] font-semibold text-[#cccccc]">
         <span className="truncate">{getHeaderTitle()}</span>
         <button className="text-[#858585] hover:text-white p-1 rounded">
           <MoreHorizontal className="w-4 h-4" />
@@ -196,7 +196,7 @@ export const PrimarySideBar: React.FC<PrimarySideBarProps> = ({
             )}
 
             {/* Outline Accordion */}
-            <div className="mt-2 border-t border-[#252526]">
+            <div className="mt-2 border-t border-[#2b2b2b]">
               <div 
                 onClick={() => setIsOutlineOpen(!isOutlineOpen)}
                 className="flex items-center px-3 py-1 text-[#cccccc] font-semibold text-[11px] cursor-pointer hover:bg-[#2a2d2e] select-none"
@@ -216,7 +216,7 @@ export const PrimarySideBar: React.FC<PrimarySideBarProps> = ({
             </div>
 
             {/* Timeline Accordion */}
-            <div className="mt-1 border-t border-[#252526]">
+            <div className="mt-1 border-t border-[#2b2b2b]">
               <div 
                 onClick={() => setIsTimelineOpen(!isTimelineOpen)}
                 className="flex items-center px-3 py-1 text-[#cccccc] font-semibold text-[11px] cursor-pointer hover:bg-[#2a2d2e] select-none"
@@ -275,12 +275,6 @@ export const PrimarySideBar: React.FC<PrimarySideBarProps> = ({
           </div>
         )}
       </div>
-
-      {/* Resize Handle on Right Edge */}
-      <div
-        onMouseDown={onResizeStart}
-        className="resizer-x absolute top-0 right-0 w-[4px] h-full cursor-col-resize hover:bg-[#0078d4] transition-colors"
-      />
     </div>
   );
 };

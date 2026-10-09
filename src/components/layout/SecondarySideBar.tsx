@@ -12,32 +12,26 @@ import {
 
 interface SecondarySideBarProps {
   width: number;
-  onResizeStart: (e: React.MouseEvent) => void;
+  onResizeStart?: (e: React.MouseEvent) => void;
   onClose: () => void;
 }
 
 export const SecondarySideBar: React.FC<SecondarySideBarProps> = ({
   width: _width,
-  onResizeStart,
+  onResizeStart: _onResizeStart,
   onClose,
 }) => {
   const [promptText, setPromptText] = useState('');
 
   return (
     <div 
-      className="w-full h-full bg-[#252526] flex flex-col select-none relative z-10 font-sans"
+      className="w-full h-full bg-[#181818] flex flex-col select-none relative z-10 font-sans"
     >
-      {/* Resize Handle on Left Edge */}
-      <div
-        onMouseDown={onResizeStart}
-        className="resizer-x absolute top-0 left-0 w-[4px] h-full cursor-col-resize hover:bg-[#0078d4] transition-colors"
-      />
-
-      {/* Header: Chat tab & action icons */}
-      <div className="h-[35px] px-3 flex items-center justify-between border-b border-[#2b2b2b] bg-[#252526]">
+      {/* Header: Chat tab & action icons (Borderless) */}
+      <div className="h-[35px] px-3 flex items-center justify-between bg-[#181818]">
         {/* Left: Chat tab */}
         <div className="flex items-center space-x-2">
-          <span className="text-xs font-semibold text-white px-1 py-0.5 border-b-2 border-[#007acc]">
+          <span className="text-xs font-semibold text-white px-1">
             Chat
           </span>
         </div>
@@ -66,7 +60,7 @@ export const SecondarySideBar: React.FC<SecondarySideBarProps> = ({
       {/* Body: Agent Empty State */}
       <div className="flex-1 overflow-y-auto p-6 flex flex-col items-center justify-center text-center space-y-3">
         {/* Star / Sparkle Icon */}
-        <div className="w-12 h-12 rounded-2xl bg-[#252526] border border-[#333333] flex items-center justify-center text-[#cccccc] shadow-inner">
+        <div className="w-12 h-12 rounded-2xl bg-[#181818] border border-[#2b2b2b] flex items-center justify-center text-[#cccccc] shadow-inner">
           <Sparkles className="w-6 h-6 text-[#38bdf8]" />
         </div>
 
@@ -84,7 +78,7 @@ export const SecondarySideBar: React.FC<SecondarySideBarProps> = ({
       </div>
 
       {/* Bottom Prompt Box */}
-      <div className="p-3 bg-[#252526] border-t border-[#2b2b2b]">
+      <div className="p-3 bg-[#181818] border-t border-[#2b2b2b]">
         <div className="bg-[#1f1f20] border border-[#333333] focus-within:border-[#007acc] rounded-lg p-2.5 space-y-2 transition-colors">
           {/* Tip at top */}
           <div className="text-[11px] text-[#858585] flex items-center space-x-1">

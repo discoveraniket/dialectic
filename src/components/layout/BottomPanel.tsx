@@ -25,11 +25,11 @@ export const BottomPanel: React.FC<BottomPanelProps> = ({
       style={{ height: isMaximized ? 'calc(100% - 35px)' : `${height}px` }} 
       className="bg-[#181818] border-t border-[#2b2b2b] flex flex-col select-none relative flex-shrink-0 z-20"
     >
-      {/* Horizontal Resize Handle on Top Edge */}
+      {/* Horizontal Split Sash on Top Edge (1px border line + 4px hitbox) */}
       {!isMaximized && (
         <div
           onMouseDown={onResizeStart}
-          className="resizer-y absolute top-0 left-0 w-full h-[4px] cursor-row-resize hover:bg-[#0078d4] transition-colors"
+          className="monaco-sash-horizontal"
         />
       )}
 

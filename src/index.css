@@ -1,6 +1,5 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+
 
 /* Custom VS Code scrollbar styling */
 ::-webkit-scrollbar {
@@ -38,11 +37,35 @@ body {
   width: 100vw;
 }
 
-/* Custom drag handle highlight */
-.resizer-x:hover, .resizer-x.is-dragging {
-  background-color: #0078d4 !important;
+/* VS Code Monaco Sash (Splitter Dividers) */
+.monaco-sash-vertical {
+  width: 4px;
+  height: 100%;
+  cursor: col-resize;
+  position: absolute;
+  top: 0;
+  z-index: 40;
+  transition: background-color 0.1s ease;
 }
 
-.resizer-y:hover, .resizer-y.is-dragging {
-  background-color: #0078d4 !important;
+.monaco-sash-vertical:hover,
+.monaco-sash-vertical.active {
+  background-color: #0078d4;
 }
+
+.monaco-sash-horizontal {
+  width: 100%;
+  height: 4px;
+  cursor: row-resize;
+  position: absolute;
+  top: -2px;
+  left: 0;
+  z-index: 40;
+  transition: background-color 0.1s ease;
+}
+
+.monaco-sash-horizontal:hover,
+.monaco-sash-horizontal.active {
+  background-color: #0078d4;
+}
+

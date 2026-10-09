@@ -1,4 +1,4 @@
-# Implementation Tasks: Dialectic Workbench UI (VS Code Web Alignment)
+# Implementation Tasks: Dialectic Workbench UI (vscode.dev Modern UI Alignment)
 
 ## Phase 1: Workbench Shell Alignment (Completed)
 - [x] Task 1.1: Update `TitleBar.tsx` to remove desktop window controls (`_ □ ✕`) and add web-friendly navigation controls (`☰` menu, `<` and `>` history buttons) matching `vscode.dev`.
@@ -16,23 +16,20 @@
 - [x] Task 2.5: Standardize all borders and dividing lines across the workbench to `#2b2b2b` and verify dark background uniformity.
 - [x] Task 2.6: Verification — Run `npm run build` and verify that the app visually matches the `vscode.dev` screenshot.
 
-## Phase 3: Modern Tiled Layout & Curved Tabs (Completed)
-- [x] Task 3.1: Update `App.tsx` to implement the recessed workbench backdrop (`#141414`), padding/gaps (`p-1.5 gap-1.5`), and floating tile wrappers (`rounded-lg border border-[#2b2b2b]`).
-- [x] Task 3.2: Update `EditorArea.tsx` tab strip to recessed background (`#141414`), curved active tab (`rounded-t-md`), and *italic* `Welcome` tab typography.
-- [x] Task 3.3: Refine outer borders and header styling in `PrimarySideBar.tsx` and `SecondarySideBar.tsx` to harmonize within the floating tile containers.
-- [x] Task 3.4: Verification — Run `npm run build` and verify clean compilation and visual alignment.
+## Phase 3: vscode.dev Modern 3-Tile Layout Alignment (Completed)
+- [x] Task 3.1: Update `App.tsx` layout shell to the 3-Tile architecture (Left Tile colocation of ActivityBar + Explorer, Center Tile, Right Tile, canvas `#1f1f1f`, `p-1 gap-1`, and inter-tile resizer sashes).
+- [x] Task 3.2: Update `TitleBar.tsx` to `#1f1f1f` with `#2b2b2b` Command Center search box and monochrome layout toggle controls.
+- [x] Task 3.3: Update `ActivityBar.tsx` and `PrimarySideBar.tsx` to `#181818` palette with internal hairline divider and borderless Explorer header.
+- [x] Task 3.4: Update `EditorArea.tsx` tab strip to `#2b2b2b` inactive background and `#1f1f1f` seamless active tab blending with `#1f1f1f` editor canvas.
+- [x] Task 3.5: Update `SecondarySideBar.tsx` (Chat) to `#181818` palette with borderless header and `StatusBar.tsx` to `#1f1f1f` palette.
+- [x] Task 3.6: Verify implementation with `npm run build` and visual inspection against reference screenshot.
 
-## Phase 4: Title Bar & Activity Bar Fine Adjustments (Completed)
-- [x] Task 4.1: Update `ActivityBar.tsx` to place the `☰` hamburger menu button at the top, directly above Explorer.
-- [x] Task 4.2: Update `TitleBar.tsx` to:
-  - Remove "Dialectic" text wordmark and place only the app logo mark on the far left.
-  - Move `←` and `→` navigation buttons directly adjacent to the left of the Command Center search box.
-  - Remove the bottom dividing border (`border-b`) from the Title Bar.
-- [x] Task 4.3: Verification — Run `npm run build` and verify clean compilation and visual alignment with reference screenshot.
-
-## Phase 5: 3-Tier Grayscale Palette Alignment (Completed)
-- [x] Task 5.1: Update `TitleBar.tsx` background to `#3c3c3c` (Shade 1).
-- [x] Task 5.2: Update `ActivityBar.tsx` background to `#333333` (Shade 2).
-- [x] Task 5.3: Update `PrimarySideBar.tsx`, `SecondarySideBar.tsx`, and tile containers in `App.tsx` to `#252526` (Shade 3).
-- [x] Task 5.4: Update `EditorArea.tsx` and `WelcomePage.tsx` to `#1e1e1e` editor canvas with `#252526` tab strip and `#1e1e1e` active tab.
-- [x] Task 5.5: Verification — Run `npm run build` and verify that the 3 shades of gray render correctly.
+## Phase 4: Minor Layout & Divider Refinements (In Progress)
+- [x] Task 4.1: Update `TitleBar.tsx` to remove the bottom divider line (`border-b border-[#2b2b2b]`).
+- [x] Task 4.2: Update `TitleBar.tsx` layout toggle controls to be free-standing individual buttons without an enclosing box.
+- [x] Task 4.3: Update `EditorArea.tsx` tab strip so active tabs have smooth curved top corners (`rounded-t-md`).
+- [x] Task 4.4: Update `App.tsx` inter-tile sashes to thin dividers with a vertical three-dot resize handle grip centered vertically.
+- [x] Task 4.5: Update `StatusBar.tsx` to remove the top divider line (`border-t border-[#2b2b2b]`).
+- [x] Task 4.6: Verification — Run `npm run build` and capture a screenshot with Edge to visually confirm all 5 refinements.
+- [x] Task 4.7: Fix active tab to be flush with the top of Center Tile (remove pt-1 px-1 padding), borderless, full-height (h-full), with smooth rounded-tr-lg (and rounded-tl-lg on first tab) matching the vscode crop.
+- [x] Task 4.8: Add smooth bottom-right concave fillet curve (scoop curve) to active tab in `EditorArea.tsx` matching vscode.dev reference.

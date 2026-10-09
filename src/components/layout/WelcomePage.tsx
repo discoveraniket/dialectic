@@ -91,7 +91,7 @@ export const WelcomePage: React.FC<WelcomePageProps> = ({
   };
 
   return (
-    <div className="h-full w-full overflow-y-auto bg-[#1e1e1e] text-[#cccccc] flex flex-col justify-between py-8 px-8 md:px-12 select-none font-sans">
+    <div className="h-full w-full overflow-y-auto bg-[#1f1f1f] text-[#cccccc] flex flex-col justify-between py-8 px-8 md:px-12 select-none font-sans">
       {/* Main 2-Column Content Area */}
       <div className="max-w-4xl w-full mx-auto space-y-8 pt-2">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-10 lg:gap-14 items-start">

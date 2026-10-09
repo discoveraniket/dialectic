@@ -10,7 +10,7 @@ import {
 
 export const StatusBar: React.FC = () => {
   return (
-    <footer className="h-[22px] bg-[#181818] border-t border-[#2b2b2b] text-[#cccccc] flex items-center justify-between px-2 text-[11px] select-none flex-shrink-0 z-30 font-sans">
+    <footer className="h-[22px] bg-[#1f1f1f] text-[#cccccc] flex items-center justify-between px-2 text-[11px] select-none flex-shrink-0 z-30 font-sans">
       {/* Left side items */}
       <div className="flex items-center space-x-1.5 h-full">
         {/* Remote Indicator (vscode.dev >< Web badge) */}

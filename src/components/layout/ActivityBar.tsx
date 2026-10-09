@@ -29,7 +29,7 @@ export const ActivityBar: React.FC<ActivityBarProps> = ({
   ];
 
   return (
-    <aside className="w-12 bg-[#333333] border-r border-[#2b2b2b] flex flex-col justify-between items-center py-1 select-none z-20 flex-shrink-0 font-sans">
+    <aside className="w-12 bg-transparent border-r border-[#2b2b2b] flex flex-col justify-between items-center py-1 select-none z-20 flex-shrink-0 font-sans">
       {/* Top action icons with Hamburger Menu at very top */}
       <div className="flex flex-col items-center space-y-1 w-full">
         {/* Application Menu Button (Hamburger) */}

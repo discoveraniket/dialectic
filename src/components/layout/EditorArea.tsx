@@ -34,42 +34,85 @@ export const EditorArea: React.FC<EditorAreaProps> = ({
   const isWelcomeActive = activeTabId === 'welcome' || openTabs.length === 0;
 
   return (
-    <div className="flex-1 flex flex-col h-full bg-[#1e1e1e] overflow-hidden font-sans">
-      {/* Editor Tab Bar: Tab strip with curved active tab */}
-      <div className="h-[35px] bg-[#252526] border-b border-[#2b2b2b] flex items-center justify-between select-none overflow-x-auto flex-shrink-0 px-1 pt-1">
-        <div className="flex items-end h-full overflow-x-auto space-x-1">
-          {openTabs.map((tab) => {
+    <div className="flex-1 flex flex-col h-full bg-[#1f1f1f] overflow-hidden font-sans">
+      {/* Editor Tab Bar: Inactive background #2b2b2b, Active tab #1f1f1f flush with top/left */}
+      <div className="h-[35px] bg-[#2b2b2b] flex items-center justify-between select-none flex-shrink-0">
+        <div className="flex items-center h-full overflow-x-auto overflow-y-hidden">
+          {openTabs.map((tab, index) => {
             const isActive = tab.id === activeTabId;
             const isWelcome = tab.id === 'welcome';
+            const isFirst = index === 0;
 
             return (
               <div
                 key={tab.id}
                 onClick={() => onSelectTab(tab.id)}
-                className={`h-[30px] flex items-center px-3 cursor-pointer group text-xs transition-colors rounded-t-md relative ${
+                style={{
+                  marginRight: isActive ? 8 : 0,
+                  marginLeft: isActive && !isFirst ? 8 : 0,
+                }}
+                className={`h-full flex items-center px-3.5 cursor-pointer group text-xs transition-colors relative flex-shrink-0 ${
                   isActive
-                    ? 'bg-[#1e1e1e] text-white border-t border-l border-r border-[#2b2b2b] -mb-[1px] z-10'
-                    : 'bg-transparent text-[#858585] hover:text-[#cccccc] hover:bg-[#2a2d2e]'
+                    ? `bg-[#1f1f1f] text-white z-10 rounded-tr-[10px] ${isFirst ? 'rounded-tl-[8px]' : 'rounded-tl-[10px]'}`
+                    : 'bg-transparent text-[#969696] hover:text-[#cccccc] hover:bg-[#323233]'
                 }`}
               >
                 {isWelcome ? (
-                  <DialecticLogo size={14} className="mr-2 flex-shrink-0" />
+                  <DialecticLogo size={15} className="mr-2 flex-shrink-0" />
                 ) : tab.title.endsWith('.md') ? (
                   <File className="w-3.5 h-3.5 mr-2 text-[#4d9375] flex-shrink-0" />
                 ) : (
                   <FileCode className="w-3.5 h-3.5 mr-2 text-[#61afef] flex-shrink-0" />
                 )}
 
-                <span className={`truncate max-w-[160px] mr-2 ${isWelcome ? 'italic' : ''}`}>
+                <span className={`truncate max-w-[160px] mr-2.5 font-normal ${isWelcome ? 'italic' : ''}`}>
                   {tab.title}
                 </span>
 
                 <button
                   onClick={(e) => onCloseTab(tab.id, e)}
-                  className="opacity-60 group-hover:opacity-100 hover:bg-[#2a2d2e] hover:text-white rounded p-0.5 transition-all"
+                  className="opacity-70 group-hover:opacity-100 hover:bg-[#383838] hover:text-white rounded p-0.5 transition-all ml-1"
                 >
-                  <X className="w-3 h-3" />
+                  <X className="w-3.5 h-3.5" />
                 </button>
+
+                {/* Bottom-right concave fillet curve (scoop) */}
+                {isActive && (
+                  <svg 
+                    style={{
+                      position: 'absolute',
+                      right: -8,
+                      bottom: 0,
+                      width: 8,
+                      height: 8,
+                      fill: '#1f1f1f',
+                      pointerEvents: 'none',
+                      zIndex: 10,
+                    }}
+                    viewBox="0 0 8 8"
+                  >
+                    <path d="M 0 0 A 8 8 0 0 0 8 8 L 0 8 Z" />
+                  </svg>
+                )}
+
+                {/* Bottom-left concave fillet curve (if not first tab) */}
+                {isActive && !isFirst && (
+                  <svg 
+                    style={{
+                      position: 'absolute',
+                      left: -8,
+                      bottom: 0,
+                      width: 8,
+                      height: 8,
+                      fill: '#1f1f1f',
+                      pointerEvents: 'none',
+                      zIndex: 10,
+                    }}
+                    viewBox="0 0 8 8"
+                  >
+                    <path d="M 8 0 A 8 8 0 0 1 0 8 L 8 8 Z" />
+                  </svg>
+                )}
               </div>
             );
           })}
@@ -77,10 +120,10 @@ export const EditorArea: React.FC<EditorAreaProps> = ({
 
         {/* Tab actions on right */}
         <div className="flex items-center space-x-1 px-2 text-[#858585]">
-          <button title="Split Editor Right" className="p-1 hover:text-white hover:bg-[#2a2d2e] rounded transition-colors">
+          <button title="Split Editor Right" className="p-1 hover:text-white hover:bg-[#333333] rounded transition-colors">
             <Split className="w-3.5 h-3.5" />
           </button>
-          <button title="More Editor Actions" className="p-1 hover:text-white hover:bg-[#2a2d2e] rounded transition-colors">
+          <button title="More Editor Actions" className="p-1 hover:text-white hover:bg-[#333333] rounded transition-colors">
             <MoreHorizontal className="w-3.5 h-3.5" />
           </button>
         </div>
@@ -88,7 +131,7 @@ export const EditorArea: React.FC<EditorAreaProps> = ({
 
       {/* Breadcrumbs bar (only shown when viewing a file, not welcome page) */}
       {!isWelcomeActive && activeTab && (
-        <div className="h-[22px] px-3 bg-[#181818] border-b border-[#2b2b2b] flex items-center text-[11px] text-[#858585] flex-shrink-0">
+        <div className="h-[22px] px-3 bg-[#1f1f1f] border-b border-[#2b2b2b] flex items-center text-[11px] text-[#858585] flex-shrink-0">
           <span className="hover:text-white cursor-pointer">workspace</span>
           <ChevronRight className="w-3 h-3 mx-1 text-[#555555]" />
           <span className="text-[#cccccc] font-medium">{activeTab.title}</span>
@@ -96,7 +139,7 @@ export const EditorArea: React.FC<EditorAreaProps> = ({
       )}
 
       {/* Editor Content Area */}
-      <div className="flex-1 overflow-y-auto bg-[#1e1e1e] relative">
+      <div className="flex-1 overflow-y-auto bg-[#1f1f1f] relative">
         {isWelcomeActive ? (
           <WelcomePage
             onOpenFolder={onOpenFolder}
