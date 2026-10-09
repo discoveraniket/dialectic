@@ -27,8 +27,21 @@ Researchers, developers, and knowledge workers seeking the modern IDE layout fou
 - **Tile 3: Right Tile (Auxiliary Bar / Chat)**:
   - Container: `rounded-lg border border-[#2b2b2b] bg-[#181818] overflow-hidden flex flex-col`.
   - Open by default on application launch (`isSecondarySidebarOpen = true`).
-  - Borderless header with `Chat` tab and `+ ∨ ... ✕` controls.
-  - Body: "Build with Agent" empty state and rounded prompt input box (`rounded-lg border border-[#333333] bg-[#1f1f20]`).
+  - Header:
+    - Left: "Chat" tab button enclosed inside a separate rounded box container (`bg-[#2b2b2b] text-white px-2.5 py-1 rounded-md text-xs font-medium`).
+    - Right: Controls `+` (New Chat), `∨` (Dropdown), `...` (More Actions), vertical divider (`|`), **Maximize button (`[ ]` corner brackets icon to toggle panel expansion)**, and `✕` (Close).
+  - Body & Prompt Box:
+    - Empty state: speech bubble with sparkles icon, "Build with Agent", and action link.
+    - Floating prompt card at the bottom: **No dividing line** between the prompt card container and the chat body (`border-t` removed).
+    - Prompt card (`rounded-lg bg-[#252525] border border-[#383838] overflow-hidden`):
+      - Tip banner at top with `/create-agent` shortcut.
+      - **Internal horizontal divider line (`border-b border-[#333333]`) separating the tip banner from the typing area**.
+      - Text input area with "Describe what to build" placeholder.
+      - Bottom action controls: **4 free-standing, unboxed buttons** (no separate button backgrounds/boxes):
+        1. `+` (Add Context)
+        2. `Auto` (Model selector)
+        3. `⇄` (Configuration / Settings)
+        4. `↑` (Send prompt)
 - **Part Status Bar (`footer`)**:
   - Height: `22px`, background: `#1f1f1f`, **no top divider line** (flows seamlessly from canvas).
   - Remote indicator badge (`>< Web`) on far left, diagnostic counters, keyboard layout, and notifications on right.

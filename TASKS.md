@@ -33,3 +33,11 @@
 - [x] Task 4.6: Verification — Run `npm run build` and capture a screenshot with Edge to visually confirm all 5 refinements.
 - [x] Task 4.7: Fix active tab to be flush with the top of Center Tile (remove pt-1 px-1 padding), borderless, full-height (h-full), with smooth rounded-tr-lg (and rounded-tl-lg on first tab) matching the vscode crop.
 - [x] Task 4.8: Add smooth bottom-right concave fillet curve (scoop curve) to active tab in `EditorArea.tsx` matching vscode.dev reference.
+
+## Phase 5: Right Chat Panel Alignment (Completed)
+- [x] Task 5.1: Update Chat header tab in `SecondarySideBar.tsx` so "Chat" is enclosed in a separate rounded box (`bg-[#2b2b2b] text-white px-2.5 py-1 rounded-md text-xs font-medium`) matching vscode.
+- [x] Task 5.2: Update Chat header action icons on the right side to `+ ∨ ... | [ ] ✕`, adding the Maximize button (`[ ]` corner brackets icon) with panel expand/restore functionality.
+- [x] Task 5.3: Remove the dividing line (`border-t border-[#2b2b2b]`) between the prompt card container and the chat body in `SecondarySideBar.tsx`.
+- [x] Task 5.4: Add an internal horizontal divider line (`border-b border-[#333333]`) between the tip banner and typing area inside the prompt card.
+- [x] Task 5.5: Update the 4 bottom action buttons (`+` Add context, `Auto` Models, `⇄` Config, `↑` Send) to be free-standing and unboxed without separate background containers.
+- [x] Task 5.6: Verification — Run `npm run build` and capture a screenshot with Edge to visually confirm all 5 chat panel refinements.

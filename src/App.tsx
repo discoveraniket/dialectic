@@ -24,6 +24,7 @@ export const App: React.FC = () => {
   const [primaryWidth, setPrimaryWidth] = useState(260);
   const [secondaryWidth, setSecondaryWidth] = useState(320);
   const [panelHeight, setPanelHeight] = useState(160);
+  const [isSecondaryMaximized, setIsSecondaryMaximized] = useState(false);
 
   // Dragging states
   const isDraggingPrimary = useRef(false);
@@ -299,11 +300,13 @@ export const App: React.FC = () => {
         {/* TILE 3: RIGHT TILE (AUXILIARY BAR / CHAT) */}
         {isSecondarySidebarOpen && (
           <div 
-            style={{ width: `${secondaryWidth}px` }}
-            className="h-full flex-shrink-0 rounded-lg border border-[#2b2b2b] bg-[#181818] overflow-hidden flex flex-col relative"
+            style={{ width: isSecondaryMaximized ? 'min(580px, 45vw)' : `${secondaryWidth}px` }}
+            className="h-full flex-shrink-0 rounded-lg border border-[#2b2b2b] bg-[#181818] overflow-hidden flex flex-col relative transition-[width] duration-150 ease-out"
           >
             <SecondarySideBar
               width={secondaryWidth}
+              isMaximized={isSecondaryMaximized}
+              onToggleMaximize={() => setIsSecondaryMaximized(!isSecondaryMaximized)}
               onClose={() => setIsSecondarySidebarOpen(false)}
               onResizeStart={(e) => {
                 e.preventDefault();
