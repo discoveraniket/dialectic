@@ -12,12 +12,16 @@ interface AgentTurnItemProps {
   turn: AgentTurn;
   onSelectChip?: (chip: string) => void;
   onDelete?: (id: string) => void;
+  onAcceptProposal?: (id: string) => void;
+  onRejectProposal?: (id: string) => void;
 }
 
 export const AgentTurnItem: React.FC<AgentTurnItemProps> = ({
   turn,
   onSelectChip,
   onDelete,
+  onAcceptProposal,
+  onRejectProposal,
 }) => {
   const [copied, setCopied] = useState(false);
 
@@ -60,7 +64,12 @@ export const AgentTurnItem: React.FC<AgentTurnItemProps> = ({
       {turn.proposals && turn.proposals.length > 0 && (
         <div className="space-y-2">
           {turn.proposals.map((proposal) => (
-            <StagedProposalCard key={proposal.id} proposal={proposal} />
+            <StagedProposalCard
+              key={proposal.id}
+              proposal={proposal}
+              onAccept={onAcceptProposal}
+              onReject={onRejectProposal}
+            />
           ))}
         </div>
       )}

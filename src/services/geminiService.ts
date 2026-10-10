@@ -1,12 +1,18 @@
 import { ChatMessage, DEFAULT_MODEL_ID, PerformanceMetrics } from '../types/chat';
+import { ConceptCanvas, ToolDefinition } from '../types/agent';
+import { agentLogger } from '../agent/telemetry/logger';
 
 export const SOCRATIC_SYSTEM_PROMPT = `You are Dialectic, an AI-augmented intellectual sparring partner and Socratic inquisitor for independent and early-stage researchers.
 
 Core Philosophy & Tenets:
 1. Dialectical Partner over Ghostwriter: You do not simply validate or flatter the researcher. You actively challenge weak reasoning, probe for unstated assumptions, and stress-test claims.
 2. Structure from Ambiguity: Take vague, initial impulses and help the researcher decompose them into formal epistemic structures: Observations, Hypotheses, Constraints, and Falsifiable Predictions.
-3. Asymmetric Agency (AI Proposes, Human Disposes): Frame ideas as proposals for the researcher to inspect, refine, or reject.
-4. Rigorous Inquisitor: Do not hesitate to ask 2 to 3 sharp, high-leverage questions to expose edge cases, technical bottlenecks, compute limits, or methodology pitfalls.
+3. Asymmetric Agency (AI Proposes, Human Disposes): When refining an idea, use the provided tools to stage concrete proposals, probe assumptions, and maintain the Concept Canvas.
+4. Active Tool Use:
+   - When the user expresses an initial vague concept or claims, call 'probe_assumptions' to surface blind spots.
+   - When an assumption or constraint is established, call 'update_concept_canvas' to persist it into working memory.
+   - When proposing a concrete section, call 'propose_document_section' so the user can inspect diffs and accept/reject them.
+   - When the idea is mature, call 'crystallize_document' to compile the complete research document.
 
 Reasoning & Epistemic Scrutiny:
 Before your final answer, you may wrap your preliminary reasoning, assumption checks, and constraint analysis inside a <thought>...</thought> block. Always present your final structured response outside the <thought> block.
@@ -28,6 +34,47 @@ export interface SendMessageOptions {
   model?: string;
   signal?: AbortSignal;
   onChunk?: (chunk: string, parsed: ParsedStreamChunk) => void;
+}
+
+export interface GeminiContentPart {
+  text?: string;
+  thought_signature?: string;
+  functionCall?: {
+    name: string;
+    args: Record<string, unknown>;
+    thought_signature?: string;
+  };
+  functionResponse?: {
+    name: string;
+    response: Record<string, unknown>;
+  };
+  [key: string]: unknown;
+}
+
+export interface GeminiContentMessage {
+  role: 'user' | 'model';
+  parts: GeminiContentPart[];
+}
+
+export interface SendGeminiWithToolsOptions {
+  messages: GeminiContentMessage[];
+  tools?: ToolDefinition[];
+  apiKey?: string;
+  model?: string;
+  signal?: AbortSignal;
+  activeCanvas?: ConceptCanvas;
+}
+
+export interface GeminiWithToolsResult {
+  content: string;
+  thinking?: string;
+  toolCalls?: Array<{
+    id: string;
+    name: string;
+    args: Record<string, unknown>;
+  }>;
+  /** Complete raw parts exactly as returned by Gemini, preserving thought_signature */
+  rawModelParts?: GeminiContentPart[];
 }
 
 export const getGeminiApiKey = (): string => {
@@ -56,6 +103,9 @@ export function parseThinkingAndContent(rawText: string): { thinking?: string; c
   return { content: rawText };
 }
 
+/**
+ * Standard Chat Streaming (used for classic conversational interactions)
+ */
 export async function sendChatMessageToGemini(
   messages: ChatMessage[],
   options: SendMessageOptions = {}
@@ -181,7 +231,7 @@ export async function sendChatMessageToGemini(
             }
           }
         } catch {
-          // Ignore partial or unparseable SSE lines
+          // Ignore partial SSE lines
         }
       }
     }
@@ -206,5 +256,133 @@ export async function sendChatMessageToGemini(
       contextTokens,
       outputTokens,
     },
+  };
+}
+
+/**
+ * Executes a function-calling enabled step with Google Gemini for the Agent Loop.
+ */
+export async function sendGeminiWithTools(
+  options: SendGeminiWithToolsOptions
+): Promise<GeminiWithToolsResult> {
+  const apiKey = options.apiKey || getGeminiApiKey();
+
+  if (!apiKey) {
+    throw new Error(
+      'Gemini API key not found. Please configure GEMINI_API_KEY in your environment.'
+    );
+  }
+
+  const rawModel = options.model || DEFAULT_MODEL;
+  const model = rawModel === 'auto' ? DEFAULT_MODEL_ID : rawModel;
+
+  // Build tools declaration
+  const toolsPayload =
+    options.tools && options.tools.length > 0
+      ? [
+          {
+            function_declarations: options.tools.map((t) => ({
+              name: t.name,
+              description: t.description,
+              parameters: t.parameters,
+            })),
+          },
+        ]
+      : undefined;
+
+  // Augment system prompt with current canvas state if present
+  let systemText = SOCRATIC_SYSTEM_PROMPT;
+  if (options.activeCanvas) {
+    systemText += `\n\nCURRENT CONCEPT CANVAS STATE:\n${JSON.stringify(options.activeCanvas, null, 2)}`;
+  }
+
+  const payload: Record<string, unknown> = {
+    system_instruction: {
+      parts: [{ text: systemText }],
+    },
+    contents: options.messages,
+    generationConfig: {
+      temperature: 0.6,
+      maxOutputTokens: 2048,
+    },
+  };
+
+  if (toolsPayload) {
+    payload.tools = toolsPayload;
+  }
+
+  agentLogger.api('geminiService', `Sending request to Gemini (${model})`, {
+    messageCount: options.messages.length,
+    toolsProvided: options.tools?.map((t) => t.name),
+  });
+
+  const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+
+  let response: Response;
+  try {
+    response = await fetch(endpoint, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(payload),
+      signal: options.signal,
+    });
+  } catch (err: unknown) {
+    if (err instanceof Error && err.name === 'AbortError') {
+      agentLogger.warn('geminiService', 'Request aborted by user');
+      throw err;
+    }
+    const errMsg = `Network error calling Gemini: ${err instanceof Error ? err.message : String(err)}`;
+    agentLogger.error('geminiService', errMsg);
+    throw new Error(errMsg);
+  }
+
+  if (!response.ok) {
+    let errorDetail = '';
+    try {
+      const errJson = await response.json();
+      errorDetail = errJson.error?.message || response.statusText;
+    } catch {
+      errorDetail = response.statusText;
+    }
+    const errorMsg = `Gemini API Error (${response.status}): ${errorDetail}`;
+    agentLogger.error('geminiService', errorMsg, { status: response.status, errorDetail });
+    throw new Error(errorMsg);
+  }
+
+  const data = await response.json();
+  const candidate = data.candidates?.[0];
+  const parts: GeminiContentPart[] = candidate?.content?.parts || [];
+
+  let rawText = '';
+  const toolCalls: Array<{ id: string; name: string; args: Record<string, unknown> }> = [];
+
+  for (const part of parts) {
+    if (part.text) {
+      rawText += part.text;
+    }
+    if (part.functionCall) {
+      toolCalls.push({
+        id: `call-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
+        name: part.functionCall.name,
+        args: part.functionCall.args || {},
+      });
+    }
+  }
+
+  const parsed = parseThinkingAndContent(rawText);
+
+  agentLogger.api('geminiService', `Received response from Gemini`, {
+    hasText: Boolean(parsed.content),
+    toolCallsCount: toolCalls.length,
+    toolCallNames: toolCalls.map((tc) => tc.name),
+  });
+
+  return {
+    content: parsed.content,
+    thinking: parsed.thinking,
+    toolCalls: toolCalls.length > 0 ? toolCalls : undefined,
+    rawModelParts: parts,
   };
 }

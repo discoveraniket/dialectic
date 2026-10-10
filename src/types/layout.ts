@@ -9,6 +9,7 @@ export type ActivityBarItem =
 export interface EditorTab {
   id: string;
   title: string;
+  content?: string;
   isDirty?: boolean;
 }
 

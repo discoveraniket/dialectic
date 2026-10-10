@@ -125,6 +125,16 @@ export const App: React.FC = () => {
     setActiveTabId(newId);
   };
 
+  const handleDocumentCrystallized = (doc: { targetFileName: string; markdownContent: string; id: string }) => {
+    const newTab: EditorTab = {
+      id: doc.id,
+      title: doc.targetFileName,
+      content: doc.markdownContent,
+    };
+    setOpenTabs((prev) => [...prev.filter((t) => t.id !== 'welcome' && t.id !== newTab.id), newTab]);
+    setActiveTabId(newTab.id);
+  };
+
   // Mouse drag resize event listeners
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
@@ -133,7 +143,9 @@ export const App: React.FC = () => {
         setPrimaryWidth(newWidth);
       }
       if (isDraggingSecondary.current) {
-        const newWidth = Math.max(200, Math.min(700, window.innerWidth - e.clientX));
+        const leftTileWidth = isActivityBarVisible ? (isPrimarySidebarOpen ? 48 + primaryWidth : 48) : 0;
+        const maxAllowed = Math.max(260, window.innerWidth - leftTileWidth - 30);
+        const newWidth = Math.max(220, Math.min(maxAllowed, window.innerWidth - e.clientX));
         setSecondaryWidth(newWidth);
       }
       if (isDraggingPanel.current) {
@@ -175,6 +187,11 @@ export const App: React.FC = () => {
       if ((e.ctrlKey || e.metaKey) && e.altKey && e.key.toLowerCase() === 'b') {
         e.preventDefault();
         setIsSecondarySidebarOpen((prev) => !prev);
+      }
+      // Ctrl+Alt+M -> Toggle Maximize Secondary Sidebar
+      if ((e.ctrlKey || e.metaKey) && e.altKey && e.key.toLowerCase() === 'm') {
+        e.preventDefault();
+        setIsSecondaryMaximized((prev) => !prev);
       }
     };
 
@@ -248,46 +265,53 @@ export const App: React.FC = () => {
         )}
 
         {/* TILE 2: CENTER TILE (EDITOR AREA + DOCKED BOTTOM PANEL) */}
-        <div className="flex-1 flex flex-col h-full rounded-lg border border-[#2b2b2b] bg-[#1f1f1f] overflow-hidden relative min-w-0">
-          {/* EDITOR AREA (WITH WELCOME LANDING PAGE) */}
-          <div className="flex-1 overflow-hidden min-h-0">
-            <EditorArea
-              openTabs={openTabs}
-              activeTabId={activeTabId}
-              onSelectTab={(id) => setActiveTabId(id)}
-              onCloseTab={handleCloseTab}
-              onOpenFolder={handleOpenFolderClick}
-              onNewFolder={handleNewFolderClick}
-              onNewFile={handleNewFile}
-            />
-          </div>
+        {!isSecondaryMaximized && (
+          <div className="flex-1 flex flex-col h-full rounded-lg border border-[#2b2b2b] bg-[#1f1f1f] overflow-hidden relative min-w-0">
+            {/* EDITOR AREA (WITH WELCOME LANDING PAGE) */}
+            <div className="flex-1 overflow-hidden min-h-0">
+              <EditorArea
+                openTabs={openTabs}
+                activeTabId={activeTabId}
+                onSelectTab={(id) => setActiveTabId(id)}
+                onCloseTab={handleCloseTab}
+                onOpenFolder={handleOpenFolderClick}
+                onNewFolder={handleNewFolderClick}
+                onNewFile={handleNewFile}
+              />
+            </div>
 
-          {/* DOCKED BOTTOM PANEL */}
-          {isBottomPanelOpen && (
-            <BottomPanel
-              height={panelHeight}
-              isMaximized={isBottomPanelMaximized}
-              onToggleMaximize={() => setIsBottomPanelMaximized(!isBottomPanelMaximized)}
-              onClose={() => setIsBottomPanelOpen(false)}
-              onResizeStart={(e) => {
-                e.preventDefault();
-                isDraggingPanel.current = true;
-                document.body.classList.add('cursor-row-resize');
-              }}
-            />
-          )}
-        </div>
+            {/* DOCKED BOTTOM PANEL */}
+            {isBottomPanelOpen && (
+              <BottomPanel
+                height={panelHeight}
+                isMaximized={isBottomPanelMaximized}
+                onToggleMaximize={() => setIsBottomPanelMaximized(!isBottomPanelMaximized)}
+                onClose={() => setIsBottomPanelOpen(false)}
+                onResizeStart={(e) => {
+                  e.preventDefault();
+                  isDraggingPanel.current = true;
+                  document.body.classList.add('cursor-row-resize');
+                }}
+              />
+            )}
+          </div>
+        )}
 
         {/* RIGHT RESIZER SASH (IN THIN INTER-TILE GAP WITH 3 VERTICAL DOTS) */}
-        {isSecondarySidebarOpen && (
+        {!isSecondaryMaximized && isSecondarySidebarOpen && (
           <div
             onMouseDown={(e) => {
               e.preventDefault();
               isDraggingSecondary.current = true;
               document.body.classList.add('cursor-col-resize');
             }}
+            onDoubleClick={() => {
+              const leftTileWidth = isActivityBarVisible ? (isPrimarySidebarOpen ? 48 + primaryWidth : 48) : 0;
+              const halfWidth = Math.round((window.innerWidth - leftTileWidth) * 0.5);
+              setSecondaryWidth((prev) => (prev > 380 ? 320 : Math.max(480, halfWidth)));
+            }}
             className="w-[4px] h-full cursor-col-resize hover:bg-[#0078d4] active:bg-[#0078d4] transition-colors z-20 flex-shrink-0 flex items-center justify-center group"
-            title="Resize Secondary Side Bar"
+            title="Resize Secondary Side Bar (Double-click to toggle 50% width)"
           >
             <div className="flex flex-col items-center space-y-[3px] group-hover:opacity-0 transition-opacity pointer-events-none select-none">
               <span className="w-[2px] h-[2px] rounded-full bg-[#666666]" />
@@ -300,14 +324,17 @@ export const App: React.FC = () => {
         {/* TILE 3: RIGHT TILE (AUXILIARY BAR / CHAT) */}
         {isSecondarySidebarOpen && (
           <div 
-            style={{ width: isSecondaryMaximized ? 'min(580px, 45vw)' : `${secondaryWidth}px` }}
-            className="h-full flex-shrink-0 rounded-lg border border-[#2b2b2b] bg-[#181818] overflow-hidden flex flex-col relative transition-[width] duration-150 ease-out"
+            style={isSecondaryMaximized ? undefined : { width: `${secondaryWidth}px` }}
+            className={`h-full rounded-lg border border-[#2b2b2b] bg-[#181818] overflow-hidden flex flex-col relative transition-all duration-150 ease-out ${
+              isSecondaryMaximized ? 'flex-1 min-w-0' : 'flex-shrink-0'
+            }`}
           >
             <SecondarySideBar
               width={secondaryWidth}
               isMaximized={isSecondaryMaximized}
               onToggleMaximize={() => setIsSecondaryMaximized(!isSecondaryMaximized)}
               onClose={() => setIsSecondarySidebarOpen(false)}
+              onDocumentCrystallized={handleDocumentCrystallized}
               onResizeStart={(e) => {
                 e.preventDefault();
                 isDraggingSecondary.current = true;

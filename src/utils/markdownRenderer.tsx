@@ -55,75 +55,169 @@ function renderTextAndMath(text: string) {
     }
 
     const lines = segment.split('\n');
-    return (
-      <React.Fragment key={segIdx}>
-        {lines.map((line, lineIdx) => {
-          const trimmed = line.trim();
-          if (!trimmed) {
-            return <div key={lineIdx} className="h-1.5" />;
-          }
+    const elements: React.ReactNode[] = [];
+    let i = 0;
 
-          // Hairline divider
-          if (trimmed === '---' || trimmed === '***' || trimmed === '___') {
-            return <div key={lineIdx} className="border-b border-[#2d2d2d] my-3.5" />;
-          }
+    while (i < lines.length) {
+      const line = lines[i];
+      const trimmed = line.trim();
 
-          // Section Headers
-          if (trimmed.startsWith('### ')) {
-            return (
-              <h4 key={lineIdx} className="font-semibold text-white text-[13px] tracking-tight mt-3 mb-1">
-                {renderInlineFormatting(trimmed.slice(4))}
-              </h4>
-            );
-          }
-          if (trimmed.startsWith('## ')) {
-            return (
-              <h3 key={lineIdx} className="font-semibold text-white text-sm tracking-tight mt-3 mb-1 text-[#38bdf8]">
-                {renderInlineFormatting(trimmed.slice(3))}
-              </h3>
-            );
-          }
-          if (trimmed.startsWith('# ')) {
-            return (
-              <h2 key={lineIdx} className="font-bold text-white text-base tracking-tight mt-3.5 mb-1.5">
-                {renderInlineFormatting(trimmed.slice(2))}
-              </h2>
-            );
-          }
+      // Check if this line starts a Markdown Table
+      // Format: line has pipes (|) and the NEXT line is a table header separator (|---|---|)
+      if (
+        trimmed.startsWith('|') &&
+        trimmed.endsWith('|') &&
+        i + 1 < lines.length &&
+        isTableSeparator(lines[i + 1].trim())
+      ) {
+        const headerLine = trimmed;
+        i += 2; // skip header and separator
+        const bodyLines: string[] = [];
 
-          // Bullet points
-          if (trimmed.startsWith('- ') || trimmed.startsWith('* ')) {
-            return (
-              <div key={lineIdx} className="flex items-start space-x-1.5 ml-1.5 my-1">
-                <span className="text-[#38bdf8] font-bold text-xs select-none">•</span>
-                <span className="flex-1">{renderInlineFormatting(trimmed.slice(2))}</span>
-              </div>
-            );
-          }
+        while (i < lines.length && lines[i].trim().startsWith('|') && lines[i].trim().endsWith('|')) {
+          bodyLines.push(lines[i].trim());
+          i++;
+        }
 
-          // Numbered lists
-          const numMatch = trimmed.match(/^(\d+)\.\s+(.*)$/);
-          if (numMatch) {
-            return (
-              <div key={lineIdx} className="flex items-start space-x-1.5 my-1.5">
-                <span className="text-[#888888] font-sans text-xs select-none font-medium flex-shrink-0">
-                  {numMatch[1]}.
-                </span>
-                <span className="flex-1">{renderInlineFormatting(numMatch[2])}</span>
-              </div>
-            );
-          }
+        elements.push(renderTable(headerLine, bodyLines, `table-${segIdx}-${i}`));
+        continue;
+      }
 
-          // Regular paragraph
-          return (
-            <p key={lineIdx} className="my-1">
-              {renderInlineFormatting(line)}
-            </p>
-          );
-        })}
-      </React.Fragment>
-    );
+      if (!trimmed) {
+        elements.push(<div key={`blank-${i}`} className="h-1.5" />);
+        i++;
+        continue;
+      }
+
+      // Hairline divider
+      if (trimmed === '---' || trimmed === '***' || trimmed === '___') {
+        elements.push(<div key={`div-${i}`} className="border-b border-[#2d2d2d] my-3.5" />);
+        i++;
+        continue;
+      }
+
+      // Section Headers (#, ##, ###)
+      if (trimmed.startsWith('### ')) {
+        elements.push(
+          <h4 key={`h4-${i}`} className="font-semibold text-white text-[13px] tracking-tight mt-3 mb-1">
+            {renderInlineFormatting(trimmed.slice(4))}
+          </h4>
+        );
+        i++;
+        continue;
+      }
+      if (trimmed.startsWith('## ')) {
+        elements.push(
+          <h3 key={`h3-${i}`} className="font-semibold text-white text-sm tracking-tight mt-3 mb-1 text-[#38bdf8]">
+            {renderInlineFormatting(trimmed.slice(3))}
+          </h3>
+        );
+        i++;
+        continue;
+      }
+      if (trimmed.startsWith('# ')) {
+        elements.push(
+          <h2 key={`h2-${i}`} className="font-bold text-white text-base tracking-tight mt-3.5 mb-1.5">
+            {renderInlineFormatting(trimmed.slice(2))}
+          </h2>
+        );
+        i++;
+        continue;
+      }
+
+      // Bullet points
+      if (trimmed.startsWith('- ') || trimmed.startsWith('* ')) {
+        elements.push(
+          <div key={`li-${i}`} className="flex items-start space-x-1.5 ml-1.5 my-1">
+            <span className="text-[#38bdf8] font-bold text-xs select-none">•</span>
+            <span className="flex-1">{renderInlineFormatting(trimmed.slice(2))}</span>
+          </div>
+        );
+        i++;
+        continue;
+      }
+
+      // Numbered lists
+      const numMatch = trimmed.match(/^(\d+)\.\s+(.*)$/);
+      if (numMatch) {
+        elements.push(
+          <div key={`ol-${i}`} className="flex items-start space-x-1.5 my-1.5">
+            <span className="text-[#888888] font-sans text-xs select-none font-medium flex-shrink-0">
+              {numMatch[1]}.
+            </span>
+            <span className="flex-1">{renderInlineFormatting(numMatch[2])}</span>
+          </div>
+        );
+        i++;
+        continue;
+      }
+
+      // Regular paragraph
+      elements.push(
+        <p key={`p-${i}`} className="my-1">
+          {renderInlineFormatting(line)}
+        </p>
+      );
+      i++;
+    }
+
+    return <React.Fragment key={segIdx}>{elements}</React.Fragment>;
   });
+}
+
+function isTableSeparator(line: string): boolean {
+  return (
+    line.startsWith('|') &&
+    line.endsWith('|') &&
+    /^\|(\s*:?-+:?\s*\|)+$/.test(line)
+  );
+}
+
+function parseTableRow(row: string): string[] {
+  return row
+    .slice(1, -1)
+    .split('|')
+    .map((cell) => cell.trim());
+}
+
+function renderTable(headerLine: string, bodyLines: string[], key: string) {
+  const headers = parseTableRow(headerLine);
+  const rows = bodyLines.map((row) => parseTableRow(row));
+
+  return (
+    <div key={key} className="my-3 overflow-x-auto rounded-lg border border-[#2b2b2b] bg-[#171717] shadow-sm">
+      <table className="w-full text-left text-[11px] border-collapse font-sans">
+        <thead className="bg-[#202020] border-b border-[#2b2b2b] text-[#cccccc] font-semibold">
+          <tr>
+            {headers.map((h, hIdx) => (
+              <th key={hIdx} className="px-3 py-2 border-r last:border-r-0 border-[#2b2b2b] font-medium tracking-tight">
+                {renderInlineFormatting(h)}
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody className="divide-y divide-[#222222] text-[#bbbbbb]">
+          {rows.map((row, rIdx) => (
+            <tr
+              key={rIdx}
+              className={`hover:bg-[#1f1f1f] transition-colors ${
+                rIdx % 2 === 1 ? 'bg-[#151515]/50' : 'bg-transparent'
+              }`}
+            >
+              {row.map((cell, cIdx) => (
+                <td
+                  key={cIdx}
+                  className="px-3 py-2 border-r last:border-r-0 border-[#2b2b2b] align-top leading-relaxed text-[#d4d4d4]"
+                >
+                  {renderInlineFormatting(cell)}
+                </td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
 }
 
 function renderInlineFormatting(line: string) {

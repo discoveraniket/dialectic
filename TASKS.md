@@ -102,3 +102,46 @@
 ## Phase 17: Build Verification & Visual Audit
 - [x] Task 17.1: Verify compilation with `npm run build` and visually audit against the reference screenshot.
 
+## Phase 18: Thread Renaming & Full Center-Tile Maximization
+- [x] Task 18.1: Update `src/hooks/useChat.ts` to support `renameSession(sessionId, newTitle)`.
+- [x] Task 18.2: Implement inline thread title editing in `src/components/chat/ChatHeader.tsx` (edit icon, double-click, input, Enter/Escape/blur commit) and in `ChatHistoryDrawer.tsx`.
+- [x] Task 18.3: Update `src/App.tsx` resize dragging constraints to allow unrestricted leftward expansion up to the Left Tile boundary, and make maximize collapse/hide Center Tile (Tile 2) so Chat (Tile 3) occupies the entire center-right area (`flex-1`).
+- [x] Task 18.4: Add fine UI enhancements: sash double-click preset width toggle, More Actions (`...`) dropdown with "Export Thread as Markdown" and "Clear Messages", and floating scroll-to-bottom button.
+- [x] Task 18.5: Verification — Run `npm run build` and verify thread renaming, free leftward expansion, and full center maximization.
+
+## Phase 19: History Dropdown Polish & Sash Toggle Fixes
+- [x] Task 19.1: Implement `deleteSession` in `src/hooks/useChat.ts` and pass to `ChatHistoryDrawer`.
+- [x] Task 19.2: Convert Chat History into a compact dropdown anchored like the More Actions box with click-outside listener and proper sizing in `ChatHeader.tsx` and `ChatHistoryDrawer.tsx`.
+- [x] Task 19.3: Fix sash double-click toggle in `src/App.tsx` with a reliable threshold between compact (320px) and half-screen width.
+- [x] Task 19.4: Verification — Run `npm run build` and verify thread deletion, history dropdown close on outside click, and sash double-click toggle.
+
+## Phase 20: Idea Crystallizer Agentic Engine (Solid Foundation)
+- [x] Task 20.1: Define crystallization domain types in `src/types/agent.ts` (`ConceptCanvas`, `ToolDefinition`, `ToolResult`, `AgentLoopEvent`, `CrystallizedDocument`).
+- [x] Task 20.2: Implement `src/agent/tools/registry.ts` with typed definitions and local executors for the 4 core tools:
+  - `probe_assumptions`
+  - `update_concept_canvas`
+  - `propose_document_section`
+  - `crystallize_document`
+- [x] Task 20.3: Implement the ReAct agent loop in `src/agent/loop/agentLoop.ts` with guardrails (max iterations, timeout, structured event emissions).
+- [x] Task 20.4: Update `src/services/geminiService.ts` to support tool calling declarations and function response cycles alongside thinking mode.
+- [x] Task 20.5: Implement integration bridge hook `src/hooks/useAgent.ts` (or enhance `useChat.ts`) to stream tool steps, staged proposals, and follow-up chips into the chat timeline.
+- [x] Task 20.6: Wire staged proposal approvals (`[✓ Accept into Dossier]` / `[✕ Reject]`) to update the active Concept Canvas and trigger live document synthesis into the editor area.
+- [x] Task 20.7: Verification — Run `npm run build` and verify end-to-end idea crystallization flow (user enters vague concept -> agent probes -> canvas updates -> proposal staged -> user accepts -> document produced in editor).
+
+## Phase 21: Socratic Diagnostic Q&A Form & Inquest Duality
+- [x] Task 21.1: Extend `src/types/agent.ts` with `DiagnosticQuestion` interface and update `probe_assumptions` tool parameter schema to support structured diagnostic questions.
+- [x] Task 21.2: Implement `src/components/chat/ActiveInquiryForm.tsx` as a docked questionnaire card above the prompt box with per-question inputs, submit, and dismiss controls.
+- [x] Task 21.3: Wire `ActiveInquiryForm` into `ChatContainer.tsx` and `useAgent.ts`, formatting completed answers into the user response stream and executing the next agent turn.
+- [x] Task 21.4: Retain the branch choice chip behavior in `SocraticInquiryGroup.tsx` so clicking branch chips populates the prompt box, while diagnostic questions render in the form.
+- [x] Task 21.5: Verification — Run `npm run build` and test the questionnaire form flow manually.
+
+## Phase 22: Agent Interaction Logger & Telemetry Panel (Freeze Elimination)
+- [x] Task 22.1: Implement `src/agent/telemetry/logger.ts` with pub/sub event stream, log levels (`INFO`, `API`, `TOOL`, `WARN`, `ERROR`), and formatted text/markdown export.
+- [x] Task 22.2: Instrument `geminiService.ts`, `agentLoop.ts`, and `registry.ts` to log every request payload, tool invocation, response event, and catch silent errors.
+- [x] Task 22.3: Implement `src/components/layout/AgentTelemetryConsole.tsx` with log stream, level filters, expandable JSON details, and `[Copy All Logs]` / `[Clear]` controls.
+- [x] Task 22.4: Integrate `AgentTelemetryConsole` into `BottomPanel.tsx` under the Output/Logs view, keeping the Chat toolbar minimal.
+- [x] Task 22.5: Add freeze watchdog & fallback in `agentLoop.ts`: ensure failed or rejected tool calls emit explicit errors and reset streaming status rather than leaving an idle cursor.
+- [x] Task 22.6: Verification — Run `npm run build` and verify that all agent actions stream into the Bottom Panel log viewer with working copy and clear actions.
+
+
+

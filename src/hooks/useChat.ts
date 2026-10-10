@@ -72,6 +72,21 @@ export function useChat() {
     }
   }, [sessions]);
 
+  const renameSession = useCallback((id: string, newTitle: string) => {
+    const trimmed = newTitle.trim();
+    if (!trimmed) return;
+    setSessions((prev) =>
+      prev.map((s) => (s.id === id ? { ...s, title: trimmed, updatedAt: Date.now() } : s))
+    );
+  }, []);
+
+  const clearCurrentSession = useCallback(() => {
+    setSessions((prev) =>
+      prev.map((s) => (s.id === activeSessionId ? { ...s, turns: [], updatedAt: Date.now() } : s))
+    );
+    setError(null);
+  }, [activeSessionId]);
+
   const sendMessage = useCallback(
     async (content: string) => {
       const trimmed = content.trim();
@@ -185,6 +200,96 @@ export function useChat() {
     [activeSession?.title, activeSession?.turns.length, activeSessionId, isLoading, messages, selectedModel]
   );
 
+  const sendAgentMessage = useCallback(
+    async (
+      content: string,
+      agentExecutor: (
+        userPrompt: string,
+        currentMessages: (ChatMessage | TimelineTurn)[],
+        modelId: string,
+        onUpdateAgentTurn: (updater: (prevTurn: ChatMessage) => ChatMessage) => void
+      ) => Promise<void>
+    ) => {
+      const trimmed = content.trim();
+      if (!trimmed || isLoading) return;
+
+      const userTurn: ChatMessage = {
+        id: `msg-user-${Date.now()}`,
+        kind: 'user',
+        role: 'user',
+        prompt: trimmed,
+        content: trimmed,
+        timestamp: Date.now(),
+        status: 'complete',
+      };
+
+      const agentPlaceholder: ChatMessage = {
+        id: `msg-agent-${Date.now() + 1}`,
+        kind: 'agent',
+        role: 'assistant',
+        content: '',
+        timestamp: Date.now(),
+        status: 'streaming',
+      };
+
+      const isFirstMessage = (activeSession?.turns.length || 0) === 0;
+      const computedTitle =
+        isFirstMessage && activeSession?.title === 'New Session'
+          ? trimmed.slice(0, 36) + (trimmed.length > 36 ? '...' : '')
+          : activeSession?.title || 'New Session';
+
+      setSessions((prev) =>
+        prev.map((s) =>
+          s.id === activeSessionId
+            ? {
+                ...s,
+                title: computedTitle,
+                updatedAt: Date.now(),
+                turns: [
+                  ...s.turns,
+                  userTurn as unknown as TimelineTurn,
+                  agentPlaceholder as unknown as TimelineTurn,
+                ],
+              }
+            : s
+        )
+      );
+
+      setIsLoading(true);
+      setError(null);
+
+      try {
+        await agentExecutor(
+          trimmed,
+          [...messages, userTurn],
+          selectedModel,
+          (updater) => {
+            setSessions((prev) =>
+              prev.map((s) =>
+                s.id === activeSessionId
+                  ? {
+                      ...s,
+                      turns: s.turns.map((t) =>
+                        t.id === agentPlaceholder.id
+                          ? (updater(t as unknown as ChatMessage) as unknown as TimelineTurn)
+                          : t
+                      ),
+                    }
+                  : s
+              )
+            );
+          }
+        );
+      } catch (err: unknown) {
+        const errMsg = err instanceof Error ? err.message : String(err);
+        setError(errMsg);
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [activeSession?.title, activeSession?.turns.length, activeSessionId, isLoading, messages, selectedModel]
+  );
+
   const deleteMessage = useCallback(
     (id: string) => {
       setSessions((prev) =>
@@ -196,6 +301,23 @@ export function useChat() {
       );
     },
     [activeSessionId]
+  );
+
+  const deleteSession = useCallback(
+    (id: string) => {
+      const remaining = sessions.filter((s) => s.id !== id);
+      if (remaining.length === 0) {
+        const fresh = createInitialSession();
+        setSessions([fresh]);
+        setActiveSessionId(fresh.id);
+      } else {
+        setSessions(remaining);
+        if (activeSessionId === id) {
+          setActiveSessionId(remaining[0].id);
+        }
+      }
+    },
+    [sessions, activeSessionId]
   );
 
   const newChat = useCallback(() => {
@@ -217,8 +339,12 @@ export function useChat() {
     selectedModel,
     setSelectedModel,
     switchSession,
+    renameSession,
+    clearCurrentSession,
     sendMessage,
+    sendAgentMessage,
     deleteMessage,
+    deleteSession,
     newChat,
   };
 }

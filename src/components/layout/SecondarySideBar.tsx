@@ -1,5 +1,6 @@
 import React from 'react';
 import { ChatContainer } from '../chat/ChatContainer';
+import { CrystallizedDocument } from '../../types/agent';
 
 interface SecondarySideBarProps {
   width: number;
@@ -7,6 +8,7 @@ interface SecondarySideBarProps {
   onToggleMaximize?: () => void;
   onResizeStart?: (e: React.MouseEvent) => void;
   onClose: () => void;
+  onDocumentCrystallized?: (doc: CrystallizedDocument) => void;
 }
 
 export const SecondarySideBar: React.FC<SecondarySideBarProps> = ({
@@ -15,6 +17,7 @@ export const SecondarySideBar: React.FC<SecondarySideBarProps> = ({
   onToggleMaximize,
   onResizeStart: _onResizeStart,
   onClose,
+  onDocumentCrystallized,
 }) => {
   return (
     <div className="w-full h-full bg-[#181818] flex flex-col relative z-10 font-sans">
@@ -22,6 +25,7 @@ export const SecondarySideBar: React.FC<SecondarySideBarProps> = ({
         isMaximized={isMaximized}
         onToggleMaximize={onToggleMaximize}
         onClose={onClose}
+        onDocumentCrystallized={onDocumentCrystallized}
       />
     </div>
   );

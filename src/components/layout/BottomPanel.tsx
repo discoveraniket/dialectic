@@ -2,8 +2,10 @@ import React from 'react';
 import { 
   X, 
   Maximize2, 
-  Minimize2 
+  Minimize2,
+  Terminal,
 } from 'lucide-react';
+import { AgentTelemetryConsole } from './AgentTelemetryConsole';
 
 interface BottomPanelProps {
   height: number;
@@ -33,10 +35,11 @@ export const BottomPanel: React.FC<BottomPanelProps> = ({
         />
       )}
 
-      {/* Panel Header Bar (Clean - No Tabs, only Maximize and Close buttons) */}
+      {/* Panel Header Bar */}
       <div className="h-[35px] px-3 flex items-center justify-between border-b border-[#2b2b2b] text-[11px] font-semibold text-[#858585] bg-[#181818]">
-        <div className="text-[11px] font-semibold tracking-wider text-[#858585] uppercase">
-          PANEL
+        <div className="flex items-center space-x-2 text-[11px] font-semibold tracking-wider text-[#cccccc] uppercase">
+          <Terminal className="w-3.5 h-3.5 text-[#38bdf8]" />
+          <span>OUTPUT / AGENT TELEMETRY</span>
         </div>
 
         {/* Panel Controls */}
@@ -58,9 +61,9 @@ export const BottomPanel: React.FC<BottomPanelProps> = ({
         </div>
       </div>
 
-      {/* Clean Empty Panel Body */}
-      <div className="flex-1 overflow-y-auto p-4 flex items-center justify-center text-xs text-[#555555]">
-        <span>Terminal console ready.</span>
+      {/* Telemetry Console Body */}
+      <div className="flex-1 overflow-hidden min-h-0">
+        <AgentTelemetryConsole />
       </div>
     </div>
   );

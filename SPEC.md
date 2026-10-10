@@ -27,9 +27,12 @@ Researchers, developers, and knowledge workers seeking the modern IDE layout fou
 - **Tile 3: Right Tile (Auxiliary Bar / Modern Agent Timeline)**:
   - Container: `rounded-lg border border-[#2b2b2b] bg-[#181818] overflow-hidden flex flex-col`.
   - Open by default on application launch (`isSecondarySidebarOpen = true`).
+  - **Leftward Expansion & Full Center Maximization**:
+    - **Free Leftward Expansion**: No arbitrary 700px width limit. Resizer sash can be dragged freely to the left until reaching the Left Tile boundary.
+    - **Full Center Maximization**: When maximized via `[ ]` button or shortcut, Tile 2 (Center Tile / Editor Area) is hidden, and Tile 3 (Chat) expands to fill the entire remaining workspace (`flex-1`) directly adjacent to Tile 1 (Left Tile). Toggling restore unhides the Center Tile and returns Chat to its previous customized width.
   - **Header (Modern Agent Top Bar)**:
-    - Left: Dynamic Active Session / Thread Title (e.g. `Esbuild Terminal Process Identification`) in clean, muted white typography (`text-xs font-medium text-[#cccccc] truncate max-w-[210px]`) with tooltip.
-    - Right: Free-standing unboxed action buttons: `+` (New Thread), `History` (Clock icon for thread drawer), `...` (More Actions), and `✕` (Close Panel) / maximize `[ ]`.
+    - Left: Dynamic Active Session / Thread Title with **inline thread renaming** (double-click or edit icon triggers an inline editing input; commits on Enter or blur, cancels on Escape).
+    - Right: Free-standing unboxed action buttons: `+` (New Thread), `History` (Clock icon for thread drawer), `...` (More Actions: Export as Markdown, Clear Messages), Maximize `[ ]` (Full Center expansion), and `✕` (Close Panel).
   - **Action Timeline Stream (Unboxed Continuous Canvas)**:
     - Zero alternating bubble boxes (`ml-4` / `mr-2` borders removed). Continuous flow on `#181818` canvas.
     - **User Turn**:
@@ -100,15 +103,16 @@ Researchers, developers, and knowledge workers seeking the modern IDE layout fou
 ## 6. Explicit Out-of-Scope List
 - Autonomous backend file system mutations and real git cloning (deferred to later agentic tool phases).
 - Multi-agent orchestration frameworks (saved for future lifecycle phases).
+- Real arbitrary shell execution without user sandboxing.
 
 ## 7. Tech Stack & Dependencies
 - **Framework**: React 19 + TypeScript
 - **Styling**: Tailwind CSS (VS Code Dark Modern palette)
 - **Icons**: Lucide React (`lucide-react`)
 - **Build Tool**: Vite (configured with `GEMINI_API_KEY` bridge)
-- **LLM API**: Google Gemini REST API / client integration
+- **LLM API**: Google Gemini REST API / client integration with structured tool definitions (Function Calling)
 
-## 8. Primary Agentic Timeline Data Models (Ground-Up Redesign)
+## 8. Primary Agentic Timeline & Crystallization Data Models
 - `TimelineTurn`: Polymorphic turn union: `UserTurn | AgentTurn`
 - `UserTurn`: `{ id: string; kind: 'user'; prompt: string; timestamp: number; contextPills?: ContextPill[] }`
 - `AgentTurn`: `{ id: string; kind: 'agent'; timestamp: number; status: 'idle' | 'executing' | 'streaming' | 'complete' | 'error'; toolSteps?: ToolStep[]; reasoning?: { thinking: string; durationText?: string }; content: string; proposals?: StagedProposal[]; followUpChips?: string[]; metrics?: PerformanceMetrics; error?: string }`
@@ -119,3 +123,56 @@ Researchers, developers, and knowledge workers seeking the modern IDE layout fou
 - `ChatSession`: `{ id: string; title: string; createdAt: number; updatedAt: number; turns: TimelineTurn[] }`
 - `PerformanceMetrics`: `{ ttftMs?: number; totalTimeMs?: number; tokensPerSec?: number; contextTokens?: number; totalTokens?: number }`
 - `AIModelOption`: `{ id: string; name: string; provider: 'gemini' | 'mock'; description?: string }`
+
+### Idea Crystallization Domain Models
+- `ConceptCanvas`:
+  ```typescript
+  export interface ConceptCanvas {
+    coreHypothesis?: string;
+    targetAudience?: string;
+    knownConstraints: string[];
+    openAmbiguities: string[];
+    nonGoals: string[];
+    status: 'drafting' | 'crystallized';
+  }
+  ```
+- `AgentToolDefinition`: Strict typed schema for Gemini function calling (`name`, `description`, `parameters`).
+- `AgentToolExecution`: `{ toolName: string; args: Record<string, unknown>; stepId: string }`
+- `CrystallizedDocument`: `{ id: string; title: string; content: string; createdAt: number; targetPath?: string }`
+
+## 9. Idea Crystallization Engine Architecture
+- **Engine Layer (`src/agent/`)**:
+  - Independent TypeScript layer decoupled from React rendering.
+  - **ReAct Agent Loop (`src/agent/loop/`)**: Step execution, iterative tool invocations with loop boundaries (max 6 turns per prompt).
+  - **Tool Registry (`src/agent/tools/`)**:
+    1. `probe_assumptions`: Surfaces 2-3 Socratic challenge questions/chips to expose blind spots.
+    2. `update_concept_canvas`: Syncs the evolving mental model (hypothesis, constraints, ambiguities, non-goals).
+    3. `propose_document_section`: Emits a `StagedProposal` card for user review ("AI Proposes, Human Disposes").
+    4. `crystallize_document`: Generates a structured markdown dossier / spec document when ambiguities are resolved.
+  - **State Synchronization (`useChat` / `useAgent`)**: Dispatches `ToolStep` and `StagedProposal` updates seamlessly into the chat timeline and editor canvas.
+
+## 10. Socratic Inquest Questionnaire & Branching Chips Architecture
+- **Inquest Duality**:
+  1. **Branch Choice Chips (`followUpChips`)**:
+     - Concise pivot choices (e.g., `[ Focus on SABIO-RK ]`, `[ Explore Falsifiability ]`).
+     - Behavior: Clicking copies the suggested prompt direction directly into the main prompt textarea.
+  2. **Diagnostic Questions Form (`diagnosticQuestions`)**:
+     - Emitted when the agent asks multi-part clarifying questions to calibrate domain, skills, or constraints.
+     - Behavior: Renders an interactive `ActiveInquiryForm` directly docked above the bottom prompt box.
+     - Each question has its own dedicated input field so the researcher can answer in place.
+     - `Submit Answers ↑`: Formats all provided answers into a structured researcher reply and triggers the agent loop.
+     - `Dismiss ✕`: Collapses or hides the form without submitting.
+
+## 11. Agent Telemetry & Log Inspector Architecture
+- **Purpose**: Expose high-fidelity, transparent logs for every agent interaction, tool invocation, and Gemini API request/response cycle to prevent silent freezes and aid debugging.
+- **Log Store (`src/agent/telemetry/logger.ts`)**:
+  - In-memory event buffer holding typed log entries: `{ id: string; timestamp: number; level: 'info' | 'tool' | 'api' | 'warn' | 'error'; source: string; message: string; details?: unknown }`.
+  - Pub/sub listener mechanism so UI views update reactively without polling.
+  - One-click markdown/text export utility (`copyAllLogs()`).
+- **Bottom Panel Integration (`BottomPanel.tsx`)**:
+  - Activated via standard shortcut (`Ctrl+J`) or layout toggle.
+  - Keeps Chat Toolbar clean and minimal (no added clutter in chat UI).
+  - Displays formatted console logs with level badges, expandable JSON detail payloads, a `Copy All` button, and a `Clear` button.
+- **Watchdog & Freeze Prevention**:
+  - Hardened error handling in `agentLoop.ts` and `geminiService.ts`: captures network drops, 4xx/5xx responses, rate limits, and JSON parse errors.
+  - Marks hanging turns with explicit error banners so the UI never stays trapped on an idle cursor.

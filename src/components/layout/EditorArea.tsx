@@ -147,23 +147,31 @@ export const EditorArea: React.FC<EditorAreaProps> = ({
             onNewFile={onNewFile}
           />
         ) : (
-          /* Raw Editor Canvas with Line Numbers */
-          <div className="flex font-mono text-xs text-[#d4d4d4] p-3 leading-6">
+          /* Editor Canvas with line numbers or rendered document */
+          <div className="flex font-mono text-xs text-[#d4d4d4] p-3 leading-6 h-full">
             {/* Gutter / Line Numbers */}
             <div className="w-12 text-right pr-4 text-[#858585] select-none border-r border-[#2b2b2b] flex flex-col flex-shrink-0">
-              {Array.from({ length: 30 }).map((_, i) => (
+              {Array.from({
+                length: Math.max(30, (activeTab?.content || '').split('\n').length),
+              }).map((_, i) => (
                 <div key={i}>{i + 1}</div>
               ))}
             </div>
 
-            {/* Code / Text Area */}
-            <div className="flex-1 pl-4 flex flex-col text-[#9cdcfe]">
-              <div className="text-[#6a9955]">// File: {activeTab?.title}</div>
-              <div>&nbsp;</div>
-              <div><span className="text-[#569cd6]">export default function</span> <span className="text-[#dcdcaa]">WorkspaceModule</span>() &#123;</div>
-              <div className="pl-4 text-[#ce9178]">"use strict";</div>
-              <div className="pl-4"><span className="text-[#c586c0]">return</span> <span className="text-[#4ec9b0]">null</span>;</div>
-              <div>&#125;</div>
+            {/* Code / Markdown Document Area */}
+            <div className="flex-1 pl-4 flex flex-col overflow-y-auto font-mono text-xs whitespace-pre-wrap select-text text-[#d4d4d4]">
+              {activeTab?.content ? (
+                <div>{activeTab.content}</div>
+              ) : (
+                <div className="flex flex-col text-[#9cdcfe]">
+                  <div className="text-[#6a9955]">// File: {activeTab?.title}</div>
+                  <div>&nbsp;</div>
+                  <div><span className="text-[#569cd6]">export default function</span> <span className="text-[#dcdcaa]">WorkspaceModule</span>() &#123;</div>
+                  <div className="pl-4 text-[#ce9178]">"use strict";</div>
+                  <div className="pl-4"><span className="text-[#c586c0]">return</span> <span className="text-[#4ec9b0]">null</span>;</div>
+                  <div>&#125;</div>
+                </div>
+              )}
             </div>
           </div>
         )}
