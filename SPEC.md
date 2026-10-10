@@ -24,22 +24,33 @@ Researchers, developers, and knowledge workers seeking the modern IDE layout fou
   - Embedded tab strip at top: Inactive background `#2b2b2b`, active tab `#1f1f1f` **flush with the top edge (no top/left gap of #2b2b2b), full height (`h-full`), borderless, with smooth convex curved top-right corner (`rounded-tr-[8px]`), top-left corner (`rounded-tl-[8px]` for first tab), and bottom-right concave fillet curve (scoop)**, seamlessly merging into `#1f1f1f` editor canvas below without a bottom border line.
   - Editor Canvas: `#1f1f1f` hosting Welcome landing page or code buffers.
   - Bottom Panel: When opened (`Ctrl+J`), docks inside the bottom of the Center Tile with a horizontal sash resizer, maintaining the Center Tile's outer rounded border.
-- **Tile 3: Right Tile (Auxiliary Bar / Chat)**:
+- **Tile 3: Right Tile (Auxiliary Bar / Modern Agent Timeline)**:
   - Container: `rounded-lg border border-[#2b2b2b] bg-[#181818] overflow-hidden flex flex-col`.
   - Open by default on application launch (`isSecondarySidebarOpen = true`).
-  - Header:
-    - Left: "Chat" tab button enclosed inside a separate rounded box container (`bg-[#2b2b2b] text-white px-2.5 py-1 rounded-md text-xs font-medium`).
-    - Right: Controls `+` (New Chat), `∨` (Dropdown), `...` (More Actions), vertical divider (`|`), **Maximize button (`[ ]` corner brackets icon to toggle panel expansion)**, and `✕` (Close).
-  - Body & Prompt Box:
-    - Empty state: speech bubble with sparkles icon, "Research with Agent", and action link.
-    - Floating prompt card at the bottom: **No dividing line** between the prompt card container and the chat body (`border-t` removed).
-    - Prompt card (`rounded-lg bg-[#252525] border border-[#383838] overflow-hidden`):
-      - Tip banner at top with `/create-agent` shortcut.
-      - **Internal horizontal divider line (`border-b border-[#333333]`) separating the tip banner from the typing area**.
+  - **Header (Modern Agent Top Bar)**:
+    - Left: Dynamic Active Session / Thread Title (e.g. `Esbuild Terminal Process Identification`) in clean, muted white typography (`text-xs font-medium text-[#cccccc] truncate max-w-[210px]`) with tooltip.
+    - Right: Free-standing unboxed action buttons: `+` (New Thread), `History` (Clock icon for thread drawer), `...` (More Actions), and `✕` (Close Panel) / maximize `[ ]`.
+  - **Action Timeline Stream (Unboxed Continuous Canvas)**:
+    - Zero alternating bubble boxes (`ml-4` / `mr-2` borders removed). Continuous flow on `#181818` canvas.
+    - **User Turn**:
+      - Researcher identity (`You`) + timestamp.
+      - Prompt text with optional context mention pills (`@claims`, `@papers`, `@files`).
+    - **Agent Turn (Execution Timeline)**:
+      - **Tool Execution Step Pill**: Rounded badge `[ >_ terminal:esbuild ]` (`bg-[#222222] border border-[#303030] rounded-md px-2.5 py-1 text-xs font-mono text-[#d4d4d4]`).
+      - **Duration Disclosure**: Collapsible summary `Worked for 4m >` or `Thought for 1.8s >` directly beneath tool pill.
+      - **Reasoning Drawer**: Collapsible epistemic chain-of-thought analysis.
+      - **Structured Typography**: Crisp bold headings (`### Cause of the Error`, `### Actions Taken`), hairline horizontal dividers (`<hr>` / `border-b border-[#2d2d2d]`), and inline code badge pills (`^4.3.3`, `@tailwindcss/vite`, `vite.config.ts`).
+      - **Code Block Utility Bar**: Rounded dark card (`bg-[#141414] border border-[#262626] rounded-lg`) with top utility bar: language badge (`bash`) on left; Terminal run, Context mention `@`, and Copy buttons on right.
+      - **Staged Proposal Cards ("AI Proposes, Human Disposes")**: Interactive pull-request style card with diff additions (`+`) / subtractions (`-`) and `[✓ Accept into Dossier]` / `[✕ Reject]` action buttons.
+      - **Socratic Probing Follow-Up Chips**: Clickable follow-up inquiry pills (`[ Focus on SABIO-RK ]`, `[ Explore Falsifiability ]`) that populate prompt input.
+      - **Telemetry Strip**: Subtle metadata bar (TTFT, tok/s, context tokens, total time).
+  - **Bottom Floating Prompt Card**:
+    - Floating prompt card at the bottom: **No dividing line** between prompt container and stream.
+    - Prompt card (`rounded-lg bg-[#252525] border border-[#383838] focus-within:border-[#007acc]`):
       - Text input area with "Write your thoughts" placeholder.
-      - Bottom action controls: **4 free-standing, unboxed buttons** (no separate button backgrounds/boxes):
+      - Bottom action controls: **4 free-standing, unboxed buttons**:
         1. `+` (Add Context)
-        2. `Auto` (Model selector)
+        2. `Auto` (Model selector with popover)
         3. `⇄` (Configuration / Settings)
         4. `↑` (Send prompt)
 - **Part Status Bar (`footer`)**:
@@ -97,8 +108,14 @@ Researchers, developers, and knowledge workers seeking the modern IDE layout fou
 - **Build Tool**: Vite (configured with `GEMINI_API_KEY` bridge)
 - **LLM API**: Google Gemini REST API / client integration
 
-## 8. Primary Chat Data Models
-- `ChatMessage`: `{ id: string; role: 'user' | 'assistant' | 'system'; content: string; thinking?: string; timestamp: number; status?: 'sending' | 'streaming' | 'complete' | 'error'; metrics?: PerformanceMetrics }`
+## 8. Primary Agentic Timeline Data Models (Ground-Up Redesign)
+- `TimelineTurn`: Polymorphic turn union: `UserTurn | AgentTurn`
+- `UserTurn`: `{ id: string; kind: 'user'; prompt: string; timestamp: number; contextPills?: ContextPill[] }`
+- `AgentTurn`: `{ id: string; kind: 'agent'; timestamp: number; status: 'idle' | 'executing' | 'streaming' | 'complete' | 'error'; toolSteps?: ToolStep[]; reasoning?: { thinking: string; durationText?: string }; content: string; proposals?: StagedProposal[]; followUpChips?: string[]; metrics?: PerformanceMetrics; error?: string }`
+- `ToolStep`: `{ id: string; label: string; iconType: 'terminal' | 'search' | 'tool' | 'code' | 'bolt'; durationText?: string; status: 'completed' | 'running' | 'error'; command?: string; output?: string }`
+- `StagedProposal`: `{ id: string; title: string; target?: string; diffLines: DiffLine[]; status?: 'pending' | 'accepted' | 'rejected' }`
+- `DiffLine`: `{ type: 'add' | 'remove' | 'context'; text: string }`
+- `ContextPill`: `{ id: string; label: string; icon?: 'file' | 'claim' | 'paper' | 'tag' }`
+- `ChatSession`: `{ id: string; title: string; createdAt: number; updatedAt: number; turns: TimelineTurn[] }`
 - `PerformanceMetrics`: `{ ttftMs?: number; totalTimeMs?: number; tokensPerSec?: number; contextTokens?: number; totalTokens?: number }`
-- `ChatSession`: `{ id: string; title: string; createdAt: number; updatedAt: number; messages: ChatMessage[] }`
 - `AIModelOption`: `{ id: string; name: string; provider: 'gemini' | 'mock'; description?: string }`

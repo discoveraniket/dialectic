@@ -69,3 +69,36 @@
 - [x] Task 9.4: Implement `src/components/chat/PerformanceMetricsBar.tsx` rendering TTFT, tok/s, context size, and total time.
 - [x] Task 9.5: Update `src/components/chat/ChatMessageItem.tsx` and list with copy/delete tile buttons, collapsible thinking, LaTeX/Markdown rendering, and performance metrics strip.
 - [x] Task 9.6: Verification — Run `npm run build` and verify thinking disclosure, LaTeX math, copy/delete actions, and performance metrics.
+
+## Phase 10: Specifications & Roadmap Synchronization (Current)
+- [x] Task 10.1: Update `SPEC.md` and `TASKS.md` with the ground-up Agent Timeline architecture and roadmap.
+
+## Phase 11: Domain Types & Initial Demo State
+- [x] Task 11.1: Re-architect `src/types/chat.ts` with ground-up agentic timeline types (`TimelineTurn`, `UserTurn`, `AgentTurn`, `ToolStep`, `StagedProposal`, `ChatSession`).
+- [x] Task 11.2: Update `src/hooks/useChat.ts` to manage sessions and preload the reference demo state (`Esbuild Terminal Process Identification`) and Dialectic Socratic dialogue.
+
+## Phase 12: Top Header & History Session Switcher
+- [x] Task 12.1: Update `src/components/chat/ChatHeader.tsx` to display dynamic thread title and modern utility buttons (`+`, `History` Clock icon, `...`, `✕`).
+- [x] Task 12.2: Implement `src/components/chat/ChatHistoryDrawer.tsx` dropdown to switch between active sessions.
+
+## Phase 13: Markdown Engine & Code Block Utility Bar
+- [x] Task 13.1: Implement `src/components/chat/CodeBlockView.tsx` with top utility bar (language label, Terminal run button, `@` context button, Copy button).
+- [x] Task 13.2: Redesign `src/utils/markdownRenderer.tsx` from scratch with inline code badges, bold section headings, hairline dividers, numbered steps, and KaTeX math.
+
+## Phase 14: Tool Execution Badge & Epistemic Reasoning
+- [x] Task 14.1: Implement `src/components/chat/ToolExecutionBadge.tsx` reproducing `[ >_ terminal:esbuild ]` and collapsible `Worked for 4m >`.
+- [x] Task 14.2: Update `src/components/chat/ReasoningDisclosure.tsx` to match the minimal modern styling.
+
+## Phase 15: Agent Turn, Staged Proposals & Follow-Up Chips
+- [x] Task 15.1: Implement `src/components/chat/StagedProposalCard.tsx` with diff styling and `[✓ Accept into Dossier]` / `[✕ Reject]`.
+- [x] Task 15.2: Implement `src/components/chat/SocraticInquiryGroup.tsx` with clickable follow-up inquiry pills.
+- [x] Task 15.3: Implement `src/components/chat/AgentTurnItem.tsx` assembling tool pills, duration disclosure, markdown stream, proposals, chips, and telemetry.
+
+## Phase 16: User Turn & Unboxed Timeline Stream Integration
+- [x] Task 16.1: Implement `src/components/chat/UserTurnItem.tsx` with researcher avatar and context mention pills (`@claims`, `@vite.config.ts`).
+- [x] Task 16.2: Implement `src/components/chat/AgentTimelineStream.tsx` as an unboxed open canvas stream.
+- [x] Task 16.3: Update `src/components/chat/ChatPromptInput.tsx` and `src/components/chat/ChatContainer.tsx` to wire all components together seamlessly.
+
+## Phase 17: Build Verification & Visual Audit
+- [x] Task 17.1: Verify compilation with `npm run build` and visually audit against the reference screenshot.
+

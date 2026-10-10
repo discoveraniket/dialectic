@@ -60,7 +60,7 @@ export const BottomPanel: React.FC<BottomPanelProps> = ({
 
       {/* Clean Empty Panel Body */}
       <div className="flex-1 overflow-y-auto p-4 flex items-center justify-center text-xs text-[#555555]">
-        <span>Panel content placeholder</span>
+        <span>Terminal console ready.</span>
       </div>
     </div>
   );

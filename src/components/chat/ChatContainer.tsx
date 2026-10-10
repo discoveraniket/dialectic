@@ -1,15 +1,16 @@
 import React, { useState } from 'react';
 import { useChat } from '../../hooks/useChat';
-import { ChatMessage } from '../../types/chat';
+import { ChatMessage, TimelineTurn } from '../../types/chat';
 import { ChatHeader } from './ChatHeader';
-import { ChatMessageList } from './ChatMessageList';
+import { ChatHistoryDrawer } from './ChatHistoryDrawer';
+import { AgentTimelineStream } from './AgentTimelineStream';
 import { ChatPromptInput } from './ChatPromptInput';
 
 interface ChatContainerProps {
   isMaximized?: boolean;
   onToggleMaximize?: () => void;
   onClose: () => void;
-  messages?: ChatMessage[];
+  messages?: (ChatMessage | TimelineTurn)[];
   isLoading?: boolean;
   onSendMessage?: (content: string) => void;
   onNewChat?: () => void;
@@ -29,6 +30,7 @@ export const ChatContainer: React.FC<ChatContainerProps> = ({
   onSelectModel,
 }) => {
   const [inputPrompt, setInputPrompt] = useState('');
+  const [isHistoryOpen, setIsHistoryOpen] = useState(false);
   const chatHook = useChat();
 
   const messages = externalMessages ?? chatHook.messages;
@@ -68,25 +70,42 @@ export const ChatContainer: React.FC<ChatContainerProps> = ({
     chatHook.setSelectedModel(modelId);
   };
 
+  const handleSelectChip = (chip: string) => {
+    setInputPrompt(chip);
+  };
+
   return (
     <div className="w-full h-full bg-[#181818] flex flex-col relative z-10 font-sans overflow-hidden">
-      {/* 1. Header with tab pill & panel window controls */}
+      {/* 1. Header with dynamic session title & panel controls */}
       <ChatHeader
+        sessionTitle={chatHook.sessionTitle}
+        isHistoryOpen={isHistoryOpen}
+        onToggleHistory={() => setIsHistoryOpen((prev) => !prev)}
         isMaximized={isMaximized}
         onToggleMaximize={onToggleMaximize}
         onClose={onClose}
         onNewChat={handleReset}
       />
 
-      {/* 2. Message History Feed or Empty State */}
-      <ChatMessageList
-        messages={messages}
+      {/* 2. History & Sessions Drawer */}
+      <ChatHistoryDrawer
+        isOpen={isHistoryOpen}
+        onClose={() => setIsHistoryOpen(false)}
+        sessions={chatHook.sessions}
+        activeSessionId={chatHook.activeSessionId}
+        onSelectSession={chatHook.switchSession}
+      />
+
+      {/* 3. Modern Unboxed Action Timeline Stream */}
+      <AgentTimelineStream
+        turns={messages}
         isLoading={isLoading}
-        onDeleteMessage={chatHook.deleteMessage}
+        onSelectChip={handleSelectChip}
+        onDeleteTurn={chatHook.deleteMessage}
         onEmptyStateAction={() => setInputPrompt('I want to define my research boundaries and constraints. Challenge my assumptions.')}
       />
 
-      {/* 3. Bottom Prompt Box with 4 unboxed controls */}
+      {/* 4. Bottom Floating Prompt Box with 4 unboxed controls */}
       <ChatPromptInput
         value={inputPrompt}
         onChange={setInputPrompt}

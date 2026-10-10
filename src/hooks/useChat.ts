@@ -1,53 +1,47 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { ChatMessage } from '../types/chat';
+import { ChatMessage, ChatSession, TimelineTurn } from '../types/chat';
 import { sendChatMessageToGemini, DEFAULT_MODEL } from '../services/geminiService';
 
-const STORAGE_KEY = 'dialectic_chat_messages_v1';
+const SESSIONS_STORAGE_KEY = 'dialectic_chat_sessions_v3';
+const ACTIVE_SESSION_STORAGE_KEY = 'dialectic_active_session_id_v3';
 const MODEL_STORAGE_KEY = 'dialectic_selected_model_v1';
 
-const INITIAL_DEMO_MESSAGES: ChatMessage[] = [
-  {
-    id: 'msg-user-demo-1',
-    role: 'user',
-    content:
-      'I want to formulate a kinetic equation for enzyme transition states using sequence features. What is the fundamental relation for transition state theory?',
-    timestamp: Date.now() - 60000,
-    status: 'complete',
-  },
-  {
-    id: 'msg-agent-demo-1',
-    role: 'assistant',
-    thinking:
-      '1. Deconstructing kinetic parameters: k_cat relates directly to transition state free energy barrier ΔG‡ via Eyring-Polanyi equation.\n2. Flagging unexamined assumptions: Sequence embeddings predict ground state structures reliably, but transition states involve femtosecond vibrational modes.\n3. Identifying research bottleneck: Without structural or solvent coordinates, pure sequence predictions are statistical correlations rather than causal biophysics.',
-    content:
-      '### Transition State Epistemic Formulation\n\nUnder **Eyring-Polanyi Transition State Theory**, the catalytic rate constant $k_{cat}$ is fundamentally related to the free energy of activation $\\Delta G^{\\ddagger}$:\n\n$$k_{cat} = \\frac{k_B T}{h} \\exp\\left(-\\frac{\\Delta G^{\\ddagger}}{RT}\\right)$$\n\nWhere:\n- $k_B$ is the **Boltzmann constant**\n- $h$ is **Planck\'s constant**\n- $R$ is the universal gas constant\n- $T$ is absolute temperature\n\n### Socratic Probing\n1. How does your sequence model plan to account for **transition state stabilization** versus simple substrate ground-state binding affinity ($K_m$)?\n2. Have you isolated negative baseline controls to prevent memorization of homology families?',
-    timestamp: Date.now() - 30000,
-    status: 'complete',
-    metrics: {
-      ttftMs: 148,
-      totalTimeMs: 1620,
-      tokensPerSec: 54.3,
-      contextTokens: 184,
-      outputTokens: 290,
-    },
-  },
-];
+function createInitialSession(): ChatSession {
+  return {
+    id: `session-${Date.now()}`,
+    title: 'New Session',
+    createdAt: Date.now(),
+    updatedAt: Date.now(),
+    turns: [],
+  };
+}
 
 export function useChat() {
-  const [messages, setMessages] = useState<ChatMessage[]>(() => {
+  const [sessions, setSessions] = useState<ChatSession[]>(() => {
     try {
-      const saved = localStorage.getItem(STORAGE_KEY);
+      const saved = localStorage.getItem(SESSIONS_STORAGE_KEY);
       if (saved) {
         const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          return parsed;
-        }
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
       }
     } catch (e) {
-      console.warn('Failed to restore chat messages from localStorage:', e);
+      console.warn('Failed to restore sessions:', e);
     }
-    return INITIAL_DEMO_MESSAGES;
+    return [createInitialSession()];
   });
+
+  const [activeSessionId, setActiveSessionId] = useState<string>(() => {
+    try {
+      const saved = localStorage.getItem(ACTIVE_SESSION_STORAGE_KEY);
+      if (saved && sessions.some((s) => s.id === saved)) return saved;
+    } catch {
+      // fallback
+    }
+    return sessions[0]?.id || `session-${Date.now()}`;
+  });
+
+  const activeSession = sessions.find((s) => s.id === activeSessionId) || sessions[0];
+  const messages: ChatMessage[] = (activeSession?.turns || []) as unknown as ChatMessage[];
 
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
@@ -55,173 +49,176 @@ export function useChat() {
     try {
       const saved = localStorage.getItem(MODEL_STORAGE_KEY);
       if (saved) return saved;
-    } catch (e) {
-      console.warn('Failed to restore selected model from localStorage:', e);
+    } catch {
+      // fallback
     }
     return DEFAULT_MODEL;
   });
 
   const abortControllerRef = useRef<AbortController | null>(null);
 
-  // Sync messages to localStorage whenever messages array updates
   useEffect(() => {
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(messages));
+      localStorage.setItem(SESSIONS_STORAGE_KEY, JSON.stringify(sessions));
+      localStorage.setItem(ACTIVE_SESSION_STORAGE_KEY, activeSessionId);
     } catch (e) {
-      console.warn('Failed to save chat messages to localStorage:', e);
+      console.warn('Failed to persist sessions:', e);
     }
-  }, [messages]);
+  }, [sessions, activeSessionId]);
 
-  // Sync selectedModel to localStorage
-  useEffect(() => {
-    try {
-      localStorage.setItem(MODEL_STORAGE_KEY, selectedModel);
-    } catch (e) {
-      console.warn('Failed to save selected model to localStorage:', e);
+  const switchSession = useCallback((id: string) => {
+    if (sessions.some((s) => s.id === id)) {
+      setActiveSessionId(id);
     }
-  }, [selectedModel]);
-
-  // Clean up ongoing request on unmount
-  useEffect(() => {
-    return () => {
-      if (abortControllerRef.current) {
-        abortControllerRef.current.abort();
-      }
-    };
-  }, []);
+  }, [sessions]);
 
   const sendMessage = useCallback(
     async (content: string) => {
       const trimmed = content.trim();
       if (!trimmed || isLoading) return;
 
-      const userMessageId = `msg-user-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
-      const assistantMessageId = `msg-agent-${Date.now() + 1}-${Math.random().toString(36).slice(2, 7)}`;
-
-      const userMessage: ChatMessage = {
-        id: userMessageId,
+      const userTurn: ChatMessage = {
+        id: `msg-user-${Date.now()}`,
+        kind: 'user',
         role: 'user',
+        prompt: trimmed,
         content: trimmed,
         timestamp: Date.now(),
         status: 'complete',
       };
 
-      const assistantMessagePlaceholder: ChatMessage = {
-        id: assistantMessageId,
+      const agentPlaceholder: ChatMessage = {
+        id: `msg-agent-${Date.now() + 1}`,
+        kind: 'agent',
         role: 'assistant',
         content: '',
         timestamp: Date.now(),
         status: 'streaming',
       };
 
-      const updatedHistory = [...messages, userMessage];
-      setMessages([...updatedHistory, assistantMessagePlaceholder]);
+      // Auto-title session from first user message if it's currently "New Session"
+      const isFirstMessage = (activeSession?.turns.length || 0) === 0;
+      const computedTitle =
+        isFirstMessage && activeSession?.title === 'New Session'
+          ? trimmed.slice(0, 36) + (trimmed.length > 36 ? '...' : '')
+          : activeSession?.title || 'New Session';
+
+      setSessions((prev) =>
+        prev.map((s) =>
+          s.id === activeSessionId
+            ? {
+                ...s,
+                title: computedTitle,
+                updatedAt: Date.now(),
+                turns: [
+                  ...s.turns,
+                  userTurn as unknown as TimelineTurn,
+                  agentPlaceholder as unknown as TimelineTurn,
+                ],
+              }
+            : s
+        )
+      );
+
       setIsLoading(true);
       setError(null);
-
       const controller = new AbortController();
       abortControllerRef.current = controller;
 
       try {
-        const result = await sendChatMessageToGemini(updatedHistory, {
+        const historyForApi = [...messages, userTurn];
+        const result = await sendChatMessageToGemini(historyForApi, {
           model: selectedModel,
           signal: controller.signal,
           onChunk: (_chunk, parsed) => {
-            setMessages((prev) =>
-              prev.map((msg) =>
-                msg.id === assistantMessageId
+            setSessions((prev) =>
+              prev.map((s) =>
+                s.id === activeSessionId
                   ? {
-                      ...msg,
-                      content: parsed.content,
-                      thinking: parsed.thinking,
-                      metrics: parsed.metrics,
-                      status: 'streaming',
+                      ...s,
+                      turns: s.turns.map((t) =>
+                        t.id === agentPlaceholder.id
+                          ? ({
+                              ...t,
+                              content: parsed.content,
+                              thinking: parsed.thinking,
+                              metrics: parsed.metrics,
+                              status: 'streaming',
+                            } as unknown as TimelineTurn)
+                          : t
+                      ),
                     }
-                  : msg
+                  : s
               )
             );
           },
         });
 
-        setMessages((prev) =>
-          prev.map((msg) =>
-            msg.id === assistantMessageId
+        setSessions((prev) =>
+          prev.map((s) =>
+            s.id === activeSessionId
               ? {
-                  ...msg,
-                  content: result.content,
-                  thinking: result.thinking,
-                  metrics: result.metrics,
-                  status: 'complete',
+                  ...s,
+                  turns: s.turns.map((t) =>
+                    t.id === agentPlaceholder.id
+                      ? ({
+                          ...t,
+                          content: result.content,
+                          thinking: result.thinking,
+                          metrics: result.metrics,
+                          status: 'complete',
+                        } as unknown as TimelineTurn)
+                      : t
+                  ),
                 }
-              : msg
+              : s
           )
         );
       } catch (err: unknown) {
-        if (err instanceof Error && err.name === 'AbortError') {
-          setMessages((prev) =>
-            prev.map((msg) =>
-              msg.id === assistantMessageId
-                ? { ...msg, status: 'complete' }
-                : msg
-            )
-          );
-        } else {
-          const errMsg = err instanceof Error ? err.message : String(err);
-          setError(errMsg);
-          setMessages((prev) =>
-            prev.map((msg) =>
-              msg.id === assistantMessageId
-                ? {
-                    ...msg,
-                    status: 'error',
-                    error: errMsg,
-                    content: msg.content || 'Failed to generate response.',
-                  }
-                : msg
-            )
-          );
-        }
+        const errMsg = err instanceof Error ? err.message : String(err);
+        setError(errMsg);
       } finally {
         setIsLoading(false);
         abortControllerRef.current = null;
       }
     },
-    [messages, isLoading, selectedModel]
+    [activeSession?.title, activeSession?.turns.length, activeSessionId, isLoading, messages, selectedModel]
   );
 
-  const deleteMessage = useCallback((id: string) => {
-    setMessages((prev) => prev.filter((msg) => msg.id !== id));
-  }, []);
+  const deleteMessage = useCallback(
+    (id: string) => {
+      setSessions((prev) =>
+        prev.map((s) =>
+          s.id === activeSessionId
+            ? { ...s, turns: s.turns.filter((t) => t.id !== id) }
+            : s
+        )
+      );
+    },
+    [activeSessionId]
+  );
 
   const newChat = useCallback(() => {
-    if (abortControllerRef.current) {
-      abortControllerRef.current.abort();
-    }
-    setMessages([]);
+    const newSession = createInitialSession();
+    setSessions((prev) => [newSession, ...prev]);
+    setActiveSessionId(newSession.id);
     setError(null);
     setIsLoading(false);
-    try {
-      localStorage.removeItem(STORAGE_KEY);
-    } catch (e) {
-      console.warn('Failed to remove chat messages from localStorage:', e);
-    }
-  }, []);
-
-  const abort = useCallback(() => {
-    if (abortControllerRef.current) {
-      abortControllerRef.current.abort();
-    }
   }, []);
 
   return {
+    sessions,
+    activeSessionId,
+    activeSession,
+    sessionTitle: activeSession?.title || 'New Session',
     messages,
     isLoading,
     error,
     selectedModel,
     setSelectedModel,
+    switchSession,
     sendMessage,
     deleteMessage,
     newChat,
-    abort,
   };
 }

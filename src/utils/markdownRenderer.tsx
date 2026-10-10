@@ -1,5 +1,6 @@
 import React from 'react';
 import katex from 'katex';
+import { CodeBlockView } from '../components/chat/CodeBlockView';
 
 interface FormattedContentProps {
   content: string;
@@ -8,7 +9,7 @@ interface FormattedContentProps {
 export const MarkdownAndLatexRenderer: React.FC<FormattedContentProps> = ({ content }) => {
   if (!content) return null;
 
-  // Split into code fences first
+  // Split content into code fences
   const parts = content.split(/(```[\s\S]*?```)/g);
 
   return (
@@ -16,35 +17,13 @@ export const MarkdownAndLatexRenderer: React.FC<FormattedContentProps> = ({ cont
       {parts.map((part, partIdx) => {
         if (part.startsWith('```') && part.endsWith('```')) {
           const lines = part.slice(3, -3).trim().split('\n');
-          const language = lines[0].match(/^[a-zA-Z0-9_-]+$/) ? lines[0] : '';
-          const codeText = language ? lines.slice(1).join('\n') : lines.join('\n');
+          const language = lines[0].match(/^[a-zA-Z0-9_-]+$/) ? lines[0] : 'bash';
+          const codeText = language && lines.length > 1 ? lines.slice(1).join('\n') : lines.join('\n');
 
-          return (
-            <div key={partIdx} className="my-2 rounded bg-[#141414] border border-[#2b2b2b] overflow-hidden">
-              <div className="flex items-center justify-between px-2.5 py-1 bg-[#1a1a1a] text-[10px] text-[#888888] border-b border-[#2b2b2b]">
-                <span>{language || 'code'}</span>
-                <button
-                  type="button"
-                  onClick={() => navigator.clipboard.writeText(codeText)}
-                  className="hover:text-white transition-colors cursor-pointer"
-                  title="Copy code"
-                >
-                  Copy
-                </button>
-              </div>
-              <pre className="p-2.5 text-[11px] font-mono text-[#d4d4d4] overflow-x-auto whitespace-pre">
-                {codeText}
-              </pre>
-            </div>
-          );
+          return <CodeBlockView key={partIdx} language={language} code={codeText} />;
         }
 
-        // Process non-code content for display math ($$...$$)
-        return (
-          <div key={partIdx}>
-            {renderTextAndMath(part)}
-          </div>
-        );
+        return <div key={partIdx}>{renderTextAndMath(part)}</div>;
       })}
     </div>
   );
@@ -62,7 +41,7 @@ function renderTextAndMath(text: string) {
         return (
           <div
             key={segIdx}
-            className="my-2.5 py-1.5 px-2 bg-[#171717] border border-[#262626] rounded text-center overflow-x-auto"
+            className="my-3 py-2 px-3 bg-[#151515] border border-[#262626] rounded-md text-center overflow-x-auto"
             dangerouslySetInnerHTML={{ __html: mathHtml }}
           />
         );
@@ -75,7 +54,6 @@ function renderTextAndMath(text: string) {
       }
     }
 
-    // Process regular text paragraphs, headers, and lists
     const lines = segment.split('\n');
     return (
       <React.Fragment key={segIdx}>
@@ -85,24 +63,29 @@ function renderTextAndMath(text: string) {
             return <div key={lineIdx} className="h-1.5" />;
           }
 
-          // Headers
+          // Hairline divider
+          if (trimmed === '---' || trimmed === '***' || trimmed === '___') {
+            return <div key={lineIdx} className="border-b border-[#2d2d2d] my-3.5" />;
+          }
+
+          // Section Headers
           if (trimmed.startsWith('### ')) {
             return (
-              <h4 key={lineIdx} className="font-semibold text-white text-[13px] mt-2 mb-1">
+              <h4 key={lineIdx} className="font-semibold text-white text-[13px] tracking-tight mt-3 mb-1">
                 {renderInlineFormatting(trimmed.slice(4))}
               </h4>
             );
           }
           if (trimmed.startsWith('## ')) {
             return (
-              <h3 key={lineIdx} className="font-semibold text-white text-sm mt-2.5 mb-1 text-[#38bdf8]">
+              <h3 key={lineIdx} className="font-semibold text-white text-sm tracking-tight mt-3 mb-1 text-[#38bdf8]">
                 {renderInlineFormatting(trimmed.slice(3))}
               </h3>
             );
           }
           if (trimmed.startsWith('# ')) {
             return (
-              <h2 key={lineIdx} className="font-bold text-white text-base mt-3 mb-1.5">
+              <h2 key={lineIdx} className="font-bold text-white text-base tracking-tight mt-3.5 mb-1.5">
                 {renderInlineFormatting(trimmed.slice(2))}
               </h2>
             );
@@ -111,7 +94,7 @@ function renderTextAndMath(text: string) {
           // Bullet points
           if (trimmed.startsWith('- ') || trimmed.startsWith('* ')) {
             return (
-              <div key={lineIdx} className="flex items-start space-x-1.5 ml-2 my-0.5">
+              <div key={lineIdx} className="flex items-start space-x-1.5 ml-1.5 my-1">
                 <span className="text-[#38bdf8] font-bold text-xs select-none">•</span>
                 <span className="flex-1">{renderInlineFormatting(trimmed.slice(2))}</span>
               </div>
@@ -122,16 +105,18 @@ function renderTextAndMath(text: string) {
           const numMatch = trimmed.match(/^(\d+)\.\s+(.*)$/);
           if (numMatch) {
             return (
-              <div key={lineIdx} className="flex items-start space-x-1.5 ml-2 my-0.5">
-                <span className="text-[#888888] font-mono text-[11px] select-none">{numMatch[1]}.</span>
+              <div key={lineIdx} className="flex items-start space-x-1.5 my-1.5">
+                <span className="text-[#888888] font-sans text-xs select-none font-medium flex-shrink-0">
+                  {numMatch[1]}.
+                </span>
                 <span className="flex-1">{renderInlineFormatting(numMatch[2])}</span>
               </div>
             );
           }
 
-          // Regular paragraph line
+          // Regular paragraph
           return (
-            <p key={lineIdx} className="my-0.5">
+            <p key={lineIdx} className="my-1">
               {renderInlineFormatting(line)}
             </p>
           );
@@ -174,7 +159,8 @@ function renderInlineFormatting(line: string) {
               </strong>
             );
           }
-          // Inline code: `code`
+
+          // Inline code pill badges: `code`
           const codeParts = bSub.split(/(`[^`]+?`)/g);
           return (
             <React.Fragment key={bIdx}>
@@ -183,7 +169,7 @@ function renderInlineFormatting(line: string) {
                   return (
                     <code
                       key={cIdx}
-                      className="px-1 py-0.5 bg-[#252525] border border-[#333333] rounded font-mono text-[11px] text-[#38bdf8]"
+                      className="px-1.5 py-0.5 bg-[#252525] border border-[#383838] rounded text-[#e0e0e0] font-mono text-[11px] font-normal mx-0.5 inline-block align-baseline"
                     >
                       {cSub.slice(1, -1)}
                     </code>
